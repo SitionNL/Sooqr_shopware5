@@ -210,6 +210,51 @@ class SooqrXml
 		return "</items>";
 	}
 
+	protected function getConfiguratorOptions($item, $article)
+	{
+		$set = $article->getConfiguratorSet();
+		$options = $set->getOptions();
+
+		$options = array_reduce($options->toArray(), function($arr, $option) {
+
+			$id = $option->getGroup()->getId();
+			if( !isset($arr[$id]) ) $arr[$id] = [];
+
+			$arr[$id][] = $option->getName();
+
+			return $arr;
+
+		}, []);
+
+		$groups = $set->getGroups();
+
+		foreach( $groups as $group )
+		{
+			$groupId = $group->getId();
+
+			if( isset($options[$groupId]) )
+			{
+				$groupOptions = $options[$groupId];
+
+				if( count($groupOptions) === 1 )
+				{
+					$item->addChild($group->getName(), $groupOptions[0]);
+				}
+				else if( count($groupOptions) > 1 )
+				{
+					$groupItem = $item->addChild($group->getName() . "s");
+
+					foreach( $groupOptions as $key => $groupOption ) 
+					{
+						$groupItem->addChild($group->getName(), $groupOption);
+					}
+				}
+			} else {
+				$item->addChild($group->getName(), "");
+			}
+		}
+	}
+
 	public function buildItem($article)
 	{
 		$mainDetail = $article->getMainDetail();
@@ -223,6 +268,8 @@ class SooqrXml
 		$item->addChild("supplier", $supplier ? $supplier->getName() : "");
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
+
+		$this->getConfiguratorOptions($item, $article);
 
 		// return xml element without the xml header
 		$dom = dom_import_simplexml($item);
