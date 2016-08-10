@@ -213,9 +213,9 @@ class SooqrXml
 	protected function getConfiguratorOptions($item, $article)
 	{
 		$set = $article->getConfiguratorSet();
-		$options = $set->getOptions();
-
-		$options = array_reduce($options->toArray(), function($arr, $option) {
+		$groups = $set->getGroups();
+		
+		$options = array_reduce($set->getOptions()->toArray(), function($arr, $option) {
 
 			$id = $option->getGroup()->getId();
 			if( !isset($arr[$id]) ) $arr[$id] = [];
@@ -225,8 +225,6 @@ class SooqrXml
 			return $arr;
 
 		}, []);
-
-		$groups = $set->getGroups();
 
 		foreach( $groups as $group )
 		{
@@ -255,6 +253,48 @@ class SooqrXml
 		}
 	}
 
+	protected function getFilterValues($item, $article)
+	{
+		$options = $article->getPropertyGroup()->getOptions();
+
+		$values = array_reduce($article->getPropertyValues()->toArray(), function($arr, $value) {
+
+			$id = $value->getOption()->getId();
+			if( !isset($arr[$id]) ) $arr[$id] = [];
+
+			$arr[$id][] = $value->getValue();
+
+			return $arr;
+
+		}, []);
+
+		foreach( $options as $option )
+		{
+			$optionId = $option->getId();
+
+			if( isset($values[$optionId]) )
+			{
+				$optionValues = $values[$optionId];
+
+				if( count($optionValues) === 1 )
+				{
+					$item->addChild($option->getName(), $optionValues[0]);
+				}
+				else if( count($optionValues) > 1 )
+				{
+					$groupItem = $item->addChild($option->getName() . "s");
+
+					foreach( $optionValues as $key => $groupOption ) 
+					{
+						$groupItem->addChild($option->getName(), $groupOption);
+					}
+				}
+			} else {
+				// $item->addChild($option->getName(), "");
+			}
+		}
+	}
+
 	public function buildItem($article)
 	{
 		$mainDetail = $article->getMainDetail();
@@ -270,6 +310,7 @@ class SooqrXml
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
 		$this->getConfiguratorOptions($item, $article);
+		$this->getFilterValues($item, $article);
 
 		// return xml element without the xml header
 		$dom = dom_import_simplexml($item);
