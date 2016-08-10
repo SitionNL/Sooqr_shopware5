@@ -293,6 +293,62 @@ class SooqrXml
 		}
 	}
 
+	public function getCategories($item, $article)
+	{
+		$categoryParents = array_map(explode(Shopware()->Config()->get('category_parents', "1"), ","), function($parent) { return (int)trim($parent); });
+
+		$articleCategories = $article->getCategories();
+
+		$xmlCategories = [];
+		$xmlSubCategories = [];
+
+		foreach( $articleCategories as $category )
+		{
+			$categories = [ $category->getName() ];
+
+			while($category = $category->getParent())
+			{
+				if( in_array($category->getId(), $categoryParents) ) break;
+				array_unshift($categories, $category->getName());
+			}
+
+			$xmlCategories = array_merge($xmlCategories, array_slice($categories, 0, 2));
+
+			if( count($categories) > 2 )
+			{
+				$xmlSubCategories = array_merge($xmlSubCategories, array_slice($categories, 2));
+			}
+		}
+		
+		if( count($xmlCategories) > 1 )
+		{
+			$categoriesElement = $item->addChild("categories");
+
+			foreach( $xmlCategories as $key => $category ) 
+			{
+				$categoriesElement->addChildWithCDATA('category', $category);
+			}
+		} 
+		else 
+		{
+			$item->addChildWithCDATA('category', isset($xmlCategories[0]) ? $xmlCategories[0] : "");
+		}
+
+		if( count($xmlSubCategories) > 1 )
+		{
+			$subCategoriesElement = $item->addChild("subcategories");
+
+			foreach( $xmlSubCategories as $key => $subCategory ) 
+			{
+				$subCategoriesElement->addChildWithCDATA('subcategory', $subCategory);
+			}
+		} 
+		else 
+		{
+			$item->addChildWithCDATA('subcategory', isset($xmlSubCategories[0]) ? $xmlSubCategories[0] : "");
+		}
+	}
+
 	public function buildItem($article)
 	{
 		$mainDetail = $article->getMainDetail();
@@ -309,6 +365,7 @@ class SooqrXml
 
 		$this->getConfiguratorOptions($item, $article);
 		$this->getFilterValues($item, $article);
+		$this->getCategories($item, $article);
 
 		// return xml element without the xml header
 		$dom = dom_import_simplexml($item);
