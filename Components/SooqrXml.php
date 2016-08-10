@@ -113,9 +113,7 @@ class SooqrXml
 	    while( !feof($handle) ) 
 	    {
 	        $buffer = fread($handle, $chunkSize);
-	        echo $buffer;
-	        ob_flush();
-	        flush();
+	        $this->echoDirect($buffer);
 
 	        if( $returnBytes ) 
 	        {
@@ -317,10 +315,17 @@ class SooqrXml
 		return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
 	}
 
+	protected function echoDirect($buffer)
+	{
+        echo $buffer;
+        ob_flush();
+        flush();
+	}
+
 	protected function outputString($filename, $str, $echo = false)
 	{
 		file_put_contents($filename, $str, FILE_APPEND);
-		if( $echo ) echo $str;
+		if( $echo ) $this->echoDirect($str);
 	}
 
 	public function buildXml($echo = false)
