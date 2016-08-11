@@ -258,19 +258,19 @@ class SooqrXml
 
 				if( count($groupOptions) === 1 )
 				{
-					$item->addChild($group->getName(), $groupOptions[0]);
+					$item->addChild($this->escapeXmlTag($group->getName()), $groupOptions[0]);
 				}
 				else if( count($groupOptions) > 1 )
 				{
-					$groupItem = $item->addChild($group->getName() . "s");
+					$groupItem = $item->addChild($this->escapeXmlTag($group->getName() . "s"));
 
 					foreach( $groupOptions as $key => $groupOption ) 
 					{
-						$groupItem->addChild($group->getName(), $groupOption);
+						$groupItem->addChild($this->escapeXmlTag($group->getName()), $groupOption);
 					}
 				}
 			} else {
-				$item->addChild($group->getName(), "");
+				$item->addChild($this->escapeXmlTag($group->getName()), "");
 			}
 		}
 	}
@@ -304,19 +304,19 @@ class SooqrXml
 
 				if( count($optionValues) === 1 )
 				{
-					$item->addChild($option->getName(), $optionValues[0]);
+					$item->addChild($this->escapeXmlTag($option->getName()), $optionValues[0]);
 				}
 				else if( count($optionValues) > 1 )
 				{
-					$groupItem = $item->addChild($option->getName() . "s");
+					$groupItem = $item->addChild($this->escapeXmlTag($option->getName() . "s"));
 
 					foreach( $optionValues as $key => $groupOption ) 
 					{
-						$groupItem->addChild($option->getName(), $groupOption);
+						$groupItem->addChild($this->escapeXmlTag($option->getName()), $groupOption);
 					}
 				}
 			} else {
-				// $item->addChild($option->getName(), "");
+				// $item->addChild($this->escapeXmlTag($option->getName()), "");
 			}
 		}
 	}
@@ -411,6 +411,11 @@ class SooqrXml
 	{
 		file_put_contents($filename, $str, FILE_APPEND);
 		if( $echo ) $this->echoDirect($str);
+	}
+
+	public function escapeXmlTag($str)
+	{
+		return htmlspecialchars(str_replace(' ', '_', $str));
 	}
 
 	public function buildXml($echo = false)
