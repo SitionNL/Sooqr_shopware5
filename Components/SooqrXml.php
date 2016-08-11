@@ -274,7 +274,11 @@ class SooqrXml
 
 	protected function getFilterValues($item, $article)
 	{
-		$options = $article->getPropertyGroup()->getOptions();
+		$propertyGroup = $article->getPropertyGroup();
+
+		if( empty($propertyGroup) ) return;
+
+		$options = $propertyGroup->getOptions();
 
 		$values = array_reduce($article->getPropertyValues()->toArray(), function($arr, $value) {
 
