@@ -232,6 +232,9 @@ class SooqrXml
 	protected function getConfiguratorOptions($item, $article)
 	{
 		$set = $article->getConfiguratorSet();
+
+		if( empty($set) ) return;
+
 		$groups = $set->getGroups();
 		
 		$options = array_reduce($set->getOptions()->toArray(), function($arr, $option) {
