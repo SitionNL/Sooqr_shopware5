@@ -408,7 +408,7 @@ class SooqrXml
 
 	public function buildXml($echo = false)
 	{
-		$this->lock->waitTillLock();
+		$this->lock->waitTillAcquired();
 
 		// if a lock wasn't acquired at first, 
 		// the xml is probably already build again, 

@@ -54,7 +54,7 @@ class Locking
 	 * @param  integer $timeout Total time before timing out
 	 * @return bool             Returns when a lock is acquired
 	 */
-	public function waitTillLock($wait = 30, $timeout = null)
+	public function waitTillAcquired($wait = 30, $timeout = null)
 	{
 		$total = 0;
 
@@ -74,7 +74,7 @@ class Locking
 
 	public function doActions(callable $cb, $wait = 30, $timeout = null)
 	{
-		$this->waitTillLock($wait, $timeout);
+		$this->waitTillAcquired($wait, $timeout);
 
 		call_user_func($cb);
 
