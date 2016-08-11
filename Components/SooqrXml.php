@@ -4,16 +4,21 @@ namespace Shopware\SitionSooqr\Components;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Shopware\SitionSooqr\Components\SimpleXMLElementExtended as SimpleXMLElement;
+use Shopware\SitionSooqr\Components\Locking;
 
 class SooqrXml
 {
 	protected $em;
+
+	protected $lock;
 
 	public function __construct()
 	{
 		set_time_limit(60 * 60); // 1 hour
 
 		$this->em = Shopware()->Models(); // modelManager
+
+		$this->lock = new Locking($this->getLockFile());
 	}
 
 	public function getPath()
@@ -40,6 +45,11 @@ class SooqrXml
 		return $this->getpath() . "/sooqr-{$date}.xml";
 	}
 
+	public function getLockFile()
+	{
+		return $this->getPath() . "/sooqr.lock";
+	}
+
 	public function moveTmpFile($tmp)
 	{
 		// (over)write filename
@@ -47,6 +57,17 @@ class SooqrXml
 
 		// delete temp file
 		@unlink($tmp);
+	}
+
+	public function needBuilding()
+	{
+		if( !file_exists($this->getFilename()) ) return true;
+
+		$maxSeconds = Shopware()->Config()->get('generate_xml_time', 23 * 60 * 60); // in seconds
+
+		$lastModified = filemtime($this->getFilename());
+
+		return (time() - $lastModified) > $maxSeconds;
 	}
 
 	public function getArticleRepository()
@@ -387,20 +408,34 @@ class SooqrXml
 
 	public function buildXml($echo = false)
 	{
-		$tmp = $this->getTmpFilename();
+		$this->lock->waitTillLock();
 
-		$this->outputString($tmp, $this->getXmlHeader(), $echo);
+		// if a lock wasn't acquired at first, 
+		// the xml is probably already build again, 
+		// so test again if it needs to be build
+		if( !$this->needBuilding() )
+		{
+			if( $echo ) $this->echoFileChunked($this->filename);
+		}
+		else
+		{
+			$tmp = $this->getTmpFilename();
 
-		$this->iterateArticles(function($article) use ($tmp, $echo) {
+			$this->outputString($tmp, $this->getXmlHeader(), $echo);
 
-			$item = $this->buildItem($article);
+			$this->iterateArticles(function($article) use ($tmp, $echo) {
 
-			$this->outputString($tmp, $item, $echo);
-		});
+				$item = $this->buildItem($article);
 
-		$this->outputString($tmp, $this->getXmlFooter(), $echo);
+				$this->outputString($tmp, $item, $echo);
+			});
 
-		$this->moveTmpFile($tmp);
+			$this->outputString($tmp, $this->getXmlFooter(), $echo);
+
+			$this->moveTmpFile($tmp);			
+		}
+
+		$this->lock->removeLock();
 	}
 
 	public function outputXml()
@@ -409,14 +444,14 @@ class SooqrXml
 
 		header('Content-Type: application/xml');
 		
-		// if( file_exists($filename) )
-		// {
-		// 	$this->echoFileChunked($filename);
-		// } 
-		// else 
-		// {
+		if( $this->needBuilding() )
+		{
 			$echoOutput = true;
 			$this->buildXml($echoOutput);
-		// }
+		} 
+		else 
+		{
+			$this->echoFileChunked($filename);
+		}
 	}
 }
