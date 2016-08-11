@@ -415,7 +415,7 @@ class SooqrXml
 		// so test again if it needs to be build
 		if( !$this->needBuilding() )
 		{
-			if( $echo ) $this->echoFileChunked($this->filename);
+			if( $echo ) $this->echoFileChunked($this->getFilename());
 		}
 		else
 		{

@@ -13,6 +13,8 @@ class Locking
 	public function __construct($path)
 	{
 		$this->path = $path;
+
+		// make sure lock file exists
 		$this->createFile();
 	}
 
