@@ -45,6 +45,16 @@ class SooqrXml
 		return $this->getpath() . "/sooqr-{$date}.xml";
 	}
 
+	public function getGzFilename()
+	{
+		return $this->getpath() . "/sooqr.xml.gz";
+	}
+
+	public function getGzTmpFilename()
+	{
+		return $this->getTmpFilename() . ".gz";
+	}
+
 	public function getLockFile()
 	{
 		return $this->getPath() . "/sooqr.lock";
