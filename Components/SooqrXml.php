@@ -5,6 +5,7 @@ namespace Shopware\SitionSooqr\Components;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Shopware\SitionSooqr\Components\SimpleXMLElementExtended as SimpleXMLElement;
 use Shopware\SitionSooqr\Components\Locking;
+use Shopware\SitionSooqr\Components\Gzip;
 
 class SooqrXml
 {
@@ -47,7 +48,7 @@ class SooqrXml
 
 	public function getGzFilename()
 	{
-		return $this->getpath() . "/sooqr.xml.gz";
+		return $this->getFilename() . ".gz";
 	}
 
 	public function getGzTmpFilename()
@@ -71,7 +72,7 @@ class SooqrXml
 
 	public function needBuilding()
 	{
-		if( !file_exists($this->getFilename()) ) return true;
+		if( !file_exists($this->getFilename()) || !file_exists($this->getGzFilename()) ) return true;
 
 		$maxSeconds = Shopware()->Config()->get('generate_xml_time', 23 * 60 * 60); // in seconds
 
@@ -392,6 +393,9 @@ class SooqrXml
 		$mainDetail = $article->getMainDetail();
 		$supplier = $article->getSupplier();
 
+		$priceGroupActive = $article->getPriceGroupActive();
+		$priceGroup = $article->getPriceGroup();
+
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChild("id", $mainDetail->getNumber());
@@ -417,9 +421,9 @@ class SooqrXml
         flush();
 	}
 
-	protected function outputString($filename, $str, $echo = false)
+	protected function outputString($tmp, $str, $echo = false)
 	{
-		file_put_contents($filename, $str, FILE_APPEND);
+		file_put_contents($tmp, $str, FILE_APPEND);
 		if( $echo ) $this->echoDirect($str);
 	}
 
@@ -470,26 +474,61 @@ class SooqrXml
 
 			$this->outputString($tmp, $this->getXmlFooter(), $echo);
 
-			$this->moveTmpFile($tmp);			
+			$this->moveTmpFile($tmp);
 		}
 
 		$this->lock->removeLock();
 	}
 
-	public function outputXml()
+	public function buildGz()
+	{
+		if( $this->needBuilding() )
+		{
+			$this->buildXml();
+		}
+
+		$gzAlreadyBuild = file_exists($this->getGzFilename()) && filemtime($this->getFilename()) < filemtime($this->getGzFilename());
+
+		if( !$gzAlreadyBuild )
+		{
+			$this->lock->waitTillAcquired();
+
+			$tmp = $this->getGzTmpFilename();
+
+			Gzip::fromFile($this->getFilename(), $tmp);
+
+			rename($tmp, $this->getGzFilename());
+			@unlink($tmp);
+
+			$this->lock->removeLock();
+		}
+
+		return $this->getGzFilename();
+	}
+
+	public function outputXml($gzip = false)
 	{
 		$filename = $this->getFilename();
 
-		header('Content-Type: application/xml');
-		
-		if( $this->needBuilding() )
+		if( $gzip )
 		{
-			$echoOutput = true;
-			$this->buildXml($echoOutput);
-		} 
-		else 
+			header("Content-Type: application/gzip");
+
+			$this->echoFileChunked($this->buildGz());
+		}
+		else
 		{
-			$this->echoFileChunked($filename);
+			header('Content-Type: application/xml');
+
+			if( $this->needBuilding() )
+			{
+				$echoOutput = true;
+				$this->buildXml($echoOutput);
+			} 
+			else 
+			{
+				$this->echoFileChunked($filename);
+			}
 		}
 	}
 }

@@ -50,32 +50,41 @@ class Gzip
 	{
 		$this->mode = 'write';
 		$mode = 'wb' . $this->level;
-		return $this->handle = gzopen($this->destination, $this->mode);
+		echo "mode: " . $mode ."<br />";
+		$this->handle = gzopen($this->destination, $this->mode);
+		return $this->handle;
 	}
 
 	public function openRead()
 	{
 		$this->mode = 'read';
 		$mode = 'rb';
-		return $this->handle = gzopen($this->destination, $mode);
+		$this->handle = gzopen($this->destination, $mode);
+		return $this->handle;
 	}
 
 	public function close()
 	{
 		gzclose($this->handle);
 		$this->handle = null;
+
+		return $this->destination;
 	}
 
 	public function write($str)
 	{
+		echo "string: " . $str . "<br />";
 		if( !$this->isOpen() )
 		{
 			$this->openWrite();
 		}
 
 		if( $this->getMode() !== 'write' ) throw new Exception("Gzip file should be opened for writing");
+		echo "{$this->mode}<br />";
+		echo "string: " . $str . "<br />";
+		$bytes = gzwrite($this->handle, $str);
 
-		gzwrite($this->handle, $str);
+		echo "bytes: " . $bytes . "<br />";
 	}
 
 	public function read($length = 1048576)
