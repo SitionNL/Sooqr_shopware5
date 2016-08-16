@@ -1,5 +1,7 @@
 <?php
 
+use Shopware\SitionSooqr\Components\ShopwareConfig;
+
 /**
  * The Bootstrap class is the main entry point of any shopware plugin.
  *
@@ -48,6 +50,7 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
             throw new \RuntimeException('At least Shopware 4.3.0 is required');
         }
 
+        (new ShopwareConfig)->createConfig($this);
 
         $this->subscribeEvent(
             'Enlight_Controller_Front_DispatchLoopStartup',
@@ -58,6 +61,11 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
         $this->registerController('frontend', 'SitionSooqr');
 
         return true;
+    }
+
+    public function afterInit()
+    {
+        $this->registerMyComponents();   
     }
 
     /**
