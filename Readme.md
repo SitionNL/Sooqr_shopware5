@@ -1,7 +1,8 @@
-# SitionSooqr
-## About SitionSooqr
-This skeleton contains a License file, fileheader and a basic README.
+SitionSooqr
+===========
 
-## License
+Generates a xml for [Sooqr](https://www.sooqr.com/)
 
-Please see [License File](LICENSE) for more information.
+
+## Url
+The url to the feed is: `http://<domain>/frontend/sition_sooqr/xml`
