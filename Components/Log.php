@@ -62,4 +62,21 @@ class Log
 		array_unshift($args, 'warn');
 		call_user_func_array([ $this, 'log' ], $args);
 	}
+
+	public function onFatalError($cb)
+	{
+		// log fatal errors
+		register_shutdown_function(function() {
+		    $error = error_get_last();
+
+		    // check if it's a core/fatal error
+		    $isFatal = ($error !== NULL && $error['type'] === E_ERROR);
+		    $logger = $this;
+
+		    if( $isFatal )
+		    {
+		    	call_user_func($cb, $logger, $error);
+		    }
+		});
+	}
 }

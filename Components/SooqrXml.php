@@ -258,7 +258,7 @@ class SooqrXml
 
 				if( count($groupOptions) === 1 )
 				{
-					$item->addChild($this->escapeXmlTag($group->getName()), $groupOptions[0]);
+					$item->addChildWithCDATA($this->escapeXmlTag($group->getName()), $groupOptions[0]);
 				}
 				else if( count($groupOptions) > 1 )
 				{
@@ -266,7 +266,7 @@ class SooqrXml
 
 					foreach( $groupOptions as $key => $groupOption ) 
 					{
-						$groupItem->addChild($this->escapeXmlTag($group->getName()), $groupOption);
+						$groupItem->addChildWithCDATA($this->escapeXmlTag($group->getName()), $groupOption);
 					}
 				}
 			} else {
@@ -304,7 +304,7 @@ class SooqrXml
 
 				if( count($optionValues) === 1 )
 				{
-					$item->addChild($this->escapeXmlTag($option->getName()), $optionValues[0]);
+					$item->addChildWithCDATA($this->escapeXmlTag($option->getName()), $optionValues[0]);
 				}
 				else if( count($optionValues) > 1 )
 				{
@@ -312,7 +312,7 @@ class SooqrXml
 
 					foreach( $optionValues as $key => $groupOption ) 
 					{
-						$groupItem->addChild($this->escapeXmlTag($option->getName()), $groupOption);
+						$groupItem->addChildWithCDATA($this->escapeXmlTag($option->getName()), $groupOption);
 					}
 				}
 			} else {
@@ -385,9 +385,9 @@ class SooqrXml
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChild("id", $mainDetail->getNumber());
-		$item->addChild("name", $article->getName());
-		$item->addChild("description", $article->getDescription());
-		$item->addChild("supplier", $supplier ? $supplier->getName() : "");
+		$item->addChildWithCDATA("name", $article->getName());
+		$item->addChildWithCDATA("description", $article->getDescription());
+		$item->addChildWithCDATA("supplier", $supplier ? $supplier->getName() : "");
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
@@ -415,7 +415,23 @@ class SooqrXml
 
 	public function escapeXmlTag($str)
 	{
-		return htmlspecialchars(str_replace(' ', '_', $str));
+		// http://www.w3schools.com/xml/xml_elements.asp
+		
+		// replace bad chars with underscores
+		// (not alfanumeric, underscore, hyphen or period)
+		$str = preg_replace("/[^A-Za-z0-9\.\-_]/", "_", $str);
+		
+		// element name can't start with xml or XML or Xml
+		// element must start with a letter or an underscore
+		if( 
+			strtolower(substr($str, 0, 3)) == "xml" ||
+			!in_array($str[0], str_split("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz_"))
+		) 
+		{
+			$str = "_" . $str;
+		}
+
+		return $str;
 	}
 
 	public function buildXml($echo = false)
