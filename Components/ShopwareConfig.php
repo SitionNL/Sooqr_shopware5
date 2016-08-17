@@ -69,11 +69,9 @@ class ShopwareConfig
 		$translations = $this->getTranslations();
  
 	    // iterate the languages
-	    foreach($translations as $locale => $snippets) {
-
-	        $localeModel = $shopRepository->findOneBy([
-	            'locale' => $locale
-	        ]);
+	    foreach( $translations as $locale => $snippets ) 
+	    {
+	        $localeModel = $shopRepository->findOneBy([ 'locale' => $locale ]);
 	 
 	        // not found? continue with next language
 	        if( $localeModel === null )
@@ -82,8 +80,8 @@ class ShopwareConfig
 	        }
 	 
 	        // iterate all snippets of the current language
-	        foreach($snippets as $element => $snippet) {
-	 
+	        foreach( $snippets as $element => $snippet ) 
+	        {
 	            // get the form element by name
 	            $elementModel = $form->getElement($element);
 	 
@@ -100,8 +98,6 @@ class ShopwareConfig
 	 
 	            // add the translation to the form element
 	            $elementModel->addTranslation($translationModel);
-	 
-	            // done
 	        }
 	    }
 	}
@@ -113,7 +109,7 @@ class ShopwareConfig
 		}, $this->getElements());
 	}
 
-	public function getName($name)
+	public static function getName($name)
 	{
 		return static::$prefix . "_" . $name;
 	}
@@ -123,15 +119,58 @@ class ShopwareConfig
 		return [
 			[ 
 				'interval', 
-				$this->getName('generate_xml_time'),
+				static::getName('time_interval'),
 		        [
 		            'label' => 'Time interval between generating xml',
 		            'scope' => Element::SCOPE_SHOP,
-		            'value' => $this->getDefault($settings, 'generate_xml_time', 23 * 60 * 60),
+		            'value' => $this->getDefault($settings, 'time_interval', 23 * 60 * 60),
 		            'description' => 'Provide a time value in number of seconds',
 		            'required' => true
 		        ]
 		    ],
+			[ 
+				'time', 
+				static::getName('time_from'),
+		        [
+		            'label' => 'Time from when the xml can be generated',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'time_from', null),
+		            'description' => 'Provide a time value'
+		        ]
+		    ],
+			[ 
+				'time', 
+				static::getName('time_to'),
+		        [
+		            'label' => 'Time to when the xml can be generated',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'time_to', null),
+		            'description' => 'Provide a time value'
+		        ]
+		    ],
+			[ 
+				'text', 
+				static::getName('account_identifier'),
+		        [
+		            'label' => 'Account identifier',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'account_identifier', null),
+		            'description' => 'Provide your Sooqr account id',
+		            'required' => true
+		        ]
+		    ],
+			[ 
+				'text', 
+				static::getName('api_key'),
+		        [
+		            'label' => 'Api Key',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'api_key', null),
+		            'description' => 'Provide a Sooqr Api key',
+		            'required' => true
+		        ]
+		    ],
+
 		];
 	}
 
@@ -140,13 +179,19 @@ class ShopwareConfig
 	    //contains all translations
 	    return [
 	        'en_GB' => [
-	            $this->getName('generate_xml_time') => 'Time interval between generating xml',
+	            static::getName('generate_xml_time') => 'Time interval between generating xml',
+	            static::getName('account_identifier') => "Account identifier",
+	            static::getName('api_key') => "Api Key",
 	        ],
 	        'de_DE' => [
-	            $this->getName('generate_xml_time') => 'Das Zeitintervall zwischen der Generierung xml',
+	            static::getName('generate_xml_time') => 'Das Zeitintervall zwischen der Generierung xml',
+	            static::getName('account_identifier') => "Kontokennung",
+	            static::getName('api_key') => "Api-Schlüssel",
 	        ],
 	        'nl_NL' => [
-	            $this->getName('generate_xml_time') => 'Tijd interval tussen het genereren van het xml',
+	            static::getName('generate_xml_time') => 'Tijd interval tussen het genereren van het xml',
+	            static::getName('account_identifier') => "Account identifier",
+	            static::getName('api_key') => "Api Key",
 	        ],
 	    ];
 	}
