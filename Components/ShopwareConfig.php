@@ -170,7 +170,16 @@ class ShopwareConfig
 		            'required' => true
 		        ]
 		    ],
-
+			[ 
+				'text', 
+				static::getName('category_parents'),
+		        [
+		            'label' => 'Category parents',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'category_parents', "1"),
+		            'description' => 'Provide the ids of the categories where the main categories belong to'
+		        ]
+		    ],
 		];
 	}
 

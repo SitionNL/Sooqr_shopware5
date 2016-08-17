@@ -6,6 +6,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 use Shopware\SitionSooqr\Components\SimpleXMLElementExtended as SimpleXMLElement;
 use Shopware\SitionSooqr\Components\Locking;
 use Shopware\SitionSooqr\Components\Gzip;
+use Shopware\SitionSooqr\Components\ShopwareConfig;
 
 class SooqrXml
 {
@@ -74,7 +75,7 @@ class SooqrXml
 	{
 		if( !file_exists($this->getFilename()) || !file_exists($this->getGzFilename()) ) return true;
 
-		$maxSeconds = Shopware()->Config()->get('generate_xml_time', 23 * 60 * 60); // in seconds
+		$maxSeconds = Shopware()->Config()->get(ShopwareConfig::getName('time_interval'), 23 * 60 * 60); // in seconds
 
 		$lastModified = filemtime($this->getFilename());
 
@@ -334,7 +335,7 @@ class SooqrXml
 
 	public function getCategories($item, $article)
 	{
-		$categoryParents = array_map(explode(Shopware()->Config()->get('category_parents', "1"), ","), function($parent) { return (int)trim($parent); });
+		$categoryParents = array_map(explode(Shopware()->Config()->get(ShopwareConfig::getName('category_parents'), "1"), ","), function($parent) { return (int)trim($parent); });
 
 		$articleCategories = $article->getCategories();
 
