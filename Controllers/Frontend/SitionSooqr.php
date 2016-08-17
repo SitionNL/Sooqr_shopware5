@@ -2,7 +2,6 @@
 
 use Shopware\SitionSooqr\Components\Log;
 use Shopware\SitionSooqr\Components\SooqrXml;
-use Shopware\SitionSooqr\Components\Gzip;
 
 class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Action
 {

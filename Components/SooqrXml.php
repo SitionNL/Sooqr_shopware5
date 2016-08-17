@@ -402,6 +402,7 @@ class SooqrXml
 		$item->addChildWithCDATA("name", $article->getName());
 		$item->addChildWithCDATA("description", $article->getDescription());
 		$item->addChildWithCDATA("supplier", $supplier ? $supplier->getName() : "");
+		$item->addChild("price", 10.00);
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
