@@ -7,12 +7,29 @@ use Shopware\SitionSooqr\Components\SimpleXMLElementExtended as SimpleXMLElement
 use Shopware\SitionSooqr\Components\Locking;
 use Shopware\SitionSooqr\Components\Gzip;
 use Shopware\SitionSooqr\Components\ShopwareConfig;
+use Shopware\SitionSooqr\Components\Helpers;
 
 class SooqrXml
 {
+	/**
+	 * @var ModelManager
+	 */
 	protected $em;
 
+	/**
+	 * @var Shopware\SitionSooqr\Components\Locking
+	 */
 	protected $lock;
+
+	/**
+	 * @var  Shopware\Models\Shop\DetachedShop
+	 */
+	protected $shop;
+
+	/**
+	 * @var  Shopware_Components_Config
+	 */
+	protected $config;
 
 	public function __construct()
 	{
@@ -21,6 +38,9 @@ class SooqrXml
 		$this->em = Shopware()->Models(); // modelManager
 
 		$this->lock = new Locking($this->getLockFile());
+
+		$this->shop = Shopware()->Shop();
+		$this->config = Shopware()->Config();
 	}
 
 	public function getPath()
@@ -164,6 +184,16 @@ class SooqrXml
 	    return $status;
 	}
 
+	public function getShopBaseUrl()
+	{
+		$host = $this->shop->getMain()->getHost();
+		$baseUrl = $this->shop->getBaseUrl();
+
+		$path = Helpers::pathCombine($host, $baseUrl);
+
+		return "http://{$path}";
+	}
+
 	/**
 	 * Build the url to an article
 	 * @return string          Url to article
@@ -172,7 +202,7 @@ class SooqrXml
 	{
 		$articleId = $article->getId();
 
-		$host = Shopware()->Config()->get("host");
+		$host = $this->config->get("host");
 
 		$db = Shopware()->Db();
 
@@ -182,7 +212,7 @@ class SooqrXml
 		$query = $db->executeQuery($sql, $params);
 		$row = $query->fetch();
 
-		return isset($row['path']) ? "http://{$host}/{$row['path']}" : "";
+		return isset($row['path']) ? Helpers::pathCombine( $this->getShopBaseUrl(), $row['path'] ) : "";
 	}
 
 	public function getImageurlForArticle($article)
@@ -203,7 +233,7 @@ class SooqrXml
 			// dont follow urls, takes a looooong time
 			// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
 			
-			return "http://{$host}/{$path}";
+			return Helpers::pathCombine( $this->getShopBaseUrl(), $path );
 		}
 
         return "";

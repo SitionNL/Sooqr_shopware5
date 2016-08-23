@@ -7,7 +7,7 @@ use Shopware\Models\Config\Element;
 
 class ShopwareConfig 
 {
-	public static $prefix = "SitionSooqr";
+	public static $prefix = "Sition_SitionSooqr";
 
 	public function getConfigShop($shopId = null)
 	{
