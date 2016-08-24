@@ -11,9 +11,12 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 
 		$sooqr->outputXml();
 
-		$shop = Shopware()->Shop();
-
 		// exit request, don't render a view
 		exit();
+	}
+
+	public function installationAction
+	{
+		
 	}
 }

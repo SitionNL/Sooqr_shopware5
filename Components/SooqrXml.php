@@ -31,16 +31,19 @@ class SooqrXml
 	 */
 	protected $config;
 
+	protected $db;
+
 	public function __construct()
 	{
 		set_time_limit(60 * 60); // 1 hour
 
 		$this->em = Shopware()->Models(); // modelManager
 
-		$this->lock = new Locking($this->getLockFile());
+		$this->lock = new Locking( $this->getLockFile() );
 
 		$this->shop = Shopware()->Shop();
 		$this->config = Shopware()->Config();
+		$this->db = Shopware()->Db();
 	}
 
 	public function getPath()
@@ -186,7 +189,7 @@ class SooqrXml
 
 	public function getShopBaseUrl()
 	{
-		$host = $this->shop->getMain()->getHost();
+		$host = $this->config->get("host");
 		$baseUrl = $this->shop->getBaseUrl();
 
 		$path = Helpers::pathCombine($host, $baseUrl);
@@ -201,8 +204,6 @@ class SooqrXml
 	public function getUrlForArticle($article)
 	{
 		$articleId = $article->getId();
-
-		$host = $this->config->get("host");
 
 		$db = Shopware()->Db();
 
@@ -424,8 +425,7 @@ class SooqrXml
 		$mainDetail = $article->getMainDetail();
 		$supplier = $article->getSupplier();
 
-		$priceGroupActive = $article->getPriceGroupActive();
-		$priceGroup = $article->getPriceGroup();
+		$price = $mainDetail->getPrices()->first();
 
 		$item = new SimpleXMLElement("<item></item>");
 
@@ -433,7 +433,7 @@ class SooqrXml
 		$item->addChildWithCDATA("name", $article->getName());
 		$item->addChildWithCDATA("description", $article->getDescription());
 		$item->addChildWithCDATA("supplier", $supplier ? $supplier->getName() : "");
-		$item->addChild("price", 10.00);
+		$item->addChildWithCDATA("price", $price->getBasePrice());
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
