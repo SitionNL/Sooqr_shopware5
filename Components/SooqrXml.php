@@ -96,7 +96,7 @@ class SooqrXml
 
 	public function needBuilding()
 	{
-		if( !file_exists($this->getFilename()) || !file_exists($this->getGzFilename()) ) return true;
+		if( !file_exists($this->getFilename()) ) return true;
 
 		$maxSeconds = Shopware()->Config()->get(ShopwareConfig::getName('time_interval'), 23 * 60 * 60); // in seconds
 
@@ -234,7 +234,7 @@ class SooqrXml
 			// dont follow urls, takes a looooong time
 			// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
 			
-			return Helpers::pathCombine( $this->getShopBaseUrl(), $path );
+			return "http://{$host}/{$path}";
 		}
 
         return "";
