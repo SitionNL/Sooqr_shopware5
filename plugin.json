@@ -8,7 +8,7 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.0.1",
+    "currentVersion": "1.0.2",
 
     "changelog": {
         "de": {
@@ -17,7 +17,8 @@
         },
         "en": {
             "1.0.0": "First release",
-            "1.0.1": "Added price to xml, url to images and articles now correct in association with to the subshops and added a sooqr installation json"
+            "1.0.1": "Added price to xml, url to images and articles now correct in association with to the subshops and added a sooqr installation json",
+            "1.0.2": "Fixed image url in xml + fixed needBuilding function"
         },
         "nl": {
             "1.0.0": "Eerste uitgave",
