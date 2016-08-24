@@ -8,17 +8,20 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.0.0",
+    "currentVersion": "1.0.1",
 
     "changelog": {
         "de": {
-            "1.0.0": "Erstveröffentlichung"
+            "1.0.0": "Erstveröffentlichung",
+            "1.0.1": "Hinzugefügt Preis xml, URL, um Bilder und Artikel jetzt korrekt in Verbindung mit den Teil Geschäfte und hat eine Solaranlage json"
         },
         "en": {
-            "1.0.0": "First release"
+            "1.0.0": "First release",
+            "1.0.1": "Added price to xml, url to images and articles now correct in association with to the subshops and added a sooqr installation json"
         },
         "nl": {
-            "1.0.0": "Eerste uitgave"
+            "1.0.0": "Eerste uitgave",
+            "1.0.1": "Prijs toegevoegd aan xml, url naar plaatjes en artikels nu goed i.s.m. subshops en sooqr installation json toegevoegd"
         }
     },
 
