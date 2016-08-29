@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+
+# name of plugin
+PLUGINDIR="SitionSooqr"
+
+# save current dir
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# create plugin dir
+mkdir -p ~/plugins
+cd ~/plugins
+mkdir $PLUGINDIR
+cd $PLUGINDIR
+
+# get url to git remote
+cd "$SCRIPTDIR"
+REMOTE_URL=$(git config --get remote.origin.url)
+cd ~/plugins/$PLUGINDIR
+
+echo "remote url: $REMOTE_URL"
+
+# clone git repo
+git clone $REMOTE_URL .
+cd ..
+
+# zip plugin dir
+php ~/public_html/bin/sw plugin:zip:dir ~/plugins/$PLUGINDIR
+
+# remove leftover
+rm -rf "$PLUGINDIR"
