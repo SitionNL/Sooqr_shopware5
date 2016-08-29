@@ -298,6 +298,35 @@ class SooqrXml
 		return "</items>";
 	}
 
+	protected function getPrice($item, $article)
+	{
+		$mainDetail = $article->getMainDetail();
+		$price = $mainDetail->getPrices()->first();
+
+		$pseudoPrice = $price->getPseudoPrice();
+		$price = $price->getPrice();
+
+		$tax = $article->getTax();
+		$taxPercentage = $tax->getTax();
+
+		// price is gross, calculate net
+		$price += $price * $taxPercentage / 100;
+
+		if( $pseudoPrice > 0 ) // has a discount
+		{
+			// pseudoPrice is gross, calculate net
+			$pseudoPrice += $pseudoPrice * $taxPercentage / 100;
+
+			$item->addChild("price", round($price, 2));
+			$item->addChild("normal_price", round($pseudoPrice, 2));
+		}
+		else
+		{
+			$item->addChild("price", $price);
+		}
+
+	}
+
 	protected function getConfiguratorOptions($item, $article)
 	{
 		$set = $article->getConfiguratorSet();
@@ -451,18 +480,16 @@ class SooqrXml
 		$mainDetail = $article->getMainDetail();
 		$supplier = $article->getSupplier();
 
-		$price = $mainDetail->getPrices()->first();
-
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChild("id", $mainDetail->getNumber());
 		$item->addChildWithCDATA("name", $article->getName());
 		$item->addChildWithCDATA("description", $article->getDescription());
 		$item->addChildWithCDATA("supplier", $supplier ? $supplier->getName() : "");
-		$item->addChildWithCDATA("price", $price->getBasePrice());
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
+		$this->getPrice($item, $article);
 		$this->getConfiguratorOptions($item, $article);
 		$this->getFilterValues($item, $article);
 		$this->getCategories($item, $article);

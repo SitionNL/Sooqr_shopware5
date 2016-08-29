@@ -56,7 +56,7 @@ class Locking
 	 * @param  integer $timeout Total time before timing out
 	 * @return bool             Returns when a lock is acquired
 	 */
-	public function waitTillAcquired($wait = 30, $timeout = null)
+	public function waitTillAcquired($wait = 30, $timeout = 3600)
 	{
 		$total = 0;
 
