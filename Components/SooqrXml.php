@@ -46,6 +46,11 @@ class SooqrXml
 		$this->db = Shopware()->Db();
 	}
 
+	public function currentShopId()
+	{
+		return $this->shop->getId();
+	}
+
 	public function getPath()
 	{
 		$path = __DIR__ . "/../tmp";
@@ -61,13 +66,15 @@ class SooqrXml
 
 	public function getFilename()
 	{
-		return $this->getpath() . "/sooqr.xml";
+		$shopId = $this->currentShopId();
+		return $this->getpath() . "/sooqr-{$shopId}.xml";
 	}
 
 	public function getTmpFilename()
 	{
+		$shopId = $this->currentShopId();
 		$date = date('YmdHis');
-		return $this->getpath() . "/sooqr-{$date}.xml";
+		return $this->getpath() . "/tempfile-sooqr-{$shopId}-{$date}.xml";
 	}
 
 	public function getGzFilename()
@@ -92,6 +99,25 @@ class SooqrXml
 
 		// delete temp file
 		@unlink($tmp);
+	}
+
+	public function cleanupOldTempfiles()
+	{
+		$path = $this->getPath();
+
+		$files = scandir($path);
+
+		// get tempfiles
+		$files = array_filter($files, function($file) {
+			$tempfileStart = "tempfile";
+			return ( substr($file, 0, strlen($tempfileStart)) === $tempfileStart );
+		});
+
+		// remove all tempfiles
+		foreach( $files as $file )
+		{
+			@unlink(Helpers::pathCombine($path, $file));
+		}
 	}
 
 	public function needBuilding()
@@ -493,6 +519,8 @@ class SooqrXml
 		}
 		else
 		{
+			$this->cleanupOldTempfiles();
+
 			$tmp = $this->getTmpFilename();
 
 			$this->outputString($tmp, $this->getXmlHeader(), $echo);
