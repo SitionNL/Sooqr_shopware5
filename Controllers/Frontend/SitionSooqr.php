@@ -29,11 +29,24 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 
 		$host = $config->get("host");
 		
+		$currency = $currentShop->getCurrency();
+		$locale = $currentShop->getLocale();
+
 		$arr = [
 			"search" => [
 				"enabled" => "0"
 			],
-			"feeds" => []
+			"feeds" => [
+				// "name" => $currentShop->getName(),
+				// "feed_url" => "http://" . Helpers::pathCombine( $host, $currentShop->getBaseUrl(), 'frontend', 'sition_sooqr', 'xml' ),
+				// "currency" => $currency ? $currency->getCurrency() : "",
+				// "locale" => $locale ? $locale->getLocale() : "",
+				// "country" => "NL",
+				// "timezone" => timezone_name_get(date_timezone_get(date_create(null))),
+				// "system" => date_default_timezone_get(),
+				// "extension" => "Sition_SitionSooqr",
+				// "version" => $this->getPluginVersion()
+			]
 		];
 
 		$arr["feeds"] = array_map(function($shop) use ($host) {
