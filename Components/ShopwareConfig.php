@@ -9,6 +9,19 @@ class ShopwareConfig
 {
 	public static $prefix = "Sition_SitionSooqr";
 
+	protected $config;
+
+	public function __construct(Shopware_Components_Config $config)
+	{
+		$this->config = $config;
+	}
+
+	public function get($key, $default = null)
+	{
+		$namedKey = static::getName($key);
+		return $this->config->get( (in_array($namedKey, $this->getElementKeys()) ? $namedKey : $key), $default );	
+	}
+
 	public function getConfigShop($shopId = null)
 	{
 		// take current shop if no shop id is given
