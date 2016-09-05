@@ -21,10 +21,20 @@ echo "remote url: $REMOTE_URL"
 
 # clone git repo
 git clone $REMOTE_URL .
+
+# get version from plugin.json
+VERSION=$(php -r "echo json_decode(file_get_contents(__DIR__ . '/plugin.json'), true)['currentVersion'];")
+
 cd ..
 
 # zip plugin dir
 php ~/public_html/bin/sw plugin:zip:dir ~/plugins/$PLUGINDIR
 
+echo "Renaming $PLUGINDIR.zip to $PLUGINDIR-$VERSION.zip"
+mv "$PLUGINDIR.zip" "$PLUGINDIR-$VERSION.zip"
+
 # remove leftover
 rm -rf "$PLUGINDIR"
+
+echo " "
+echo "~/plugins/$PLUGINDIR-$VERSION.zip"
