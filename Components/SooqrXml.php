@@ -31,6 +31,9 @@ class SooqrXml
 	 */
 	protected $config;
 
+	/**
+	 * @var Shopware Database Instance
+	 */
 	protected $db;
 
 	public function __construct()
@@ -324,7 +327,6 @@ class SooqrXml
 		{
 			$item->addChild("price", $price);
 		}
-
 	}
 
 	protected function getConfiguratorOptions($item, $article)
@@ -535,7 +537,9 @@ class SooqrXml
 
 	public function buildXml($echo = false)
 	{
-		$this->lock->waitTillAcquired();
+		$acquired = $this->lock->waitTillAcquired();
+
+		if( $acquired === false ) return;
 
 		// if a lock wasn't acquired at first, 
 		// the xml is probably already build again, 
@@ -565,6 +569,7 @@ class SooqrXml
 		}
 
 		$this->lock->removeLock();
+
 	}
 
 	public function buildGz()

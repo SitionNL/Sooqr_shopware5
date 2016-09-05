@@ -76,10 +76,11 @@ class Locking
 
 	public function doActions(callable $cb, $wait = 30, $timeout = null)
 	{
-		$this->waitTillAcquired($wait, $timeout);
+		if( $this->waitTillAcquired($wait, $timeout) )
+		{
+			call_user_func($cb);
 
-		call_user_func($cb);
-
-		$this->removeLock();
+			$this->removeLock();
+		}
 	}
 }
