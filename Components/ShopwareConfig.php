@@ -142,26 +142,6 @@ class ShopwareConfig
 		        ]
 		    ],
 			[ 
-				'time', 
-				static::getName('time_from'),
-		        [
-		            'label' => 'Time from when the xml can be generated',
-		            'scope' => Element::SCOPE_SHOP,
-		            'value' => $this->getDefault($settings, 'time_from', null),
-		            'description' => 'Provide a time value'
-		        ]
-		    ],
-			[ 
-				'time', 
-				static::getName('time_to'),
-		        [
-		            'label' => 'Time to when the xml can be generated',
-		            'scope' => Element::SCOPE_SHOP,
-		            'value' => $this->getDefault($settings, 'time_to', null),
-		            'description' => 'Provide a time value'
-		        ]
-		    ],
-			[ 
 				'text', 
 				static::getName('account_identifier'),
 		        [
@@ -169,17 +149,6 @@ class ShopwareConfig
 		            'scope' => Element::SCOPE_SHOP,
 		            'value' => $this->getDefault($settings, 'account_identifier', null),
 		            'description' => 'Provide your Sooqr account id',
-		            'required' => true
-		        ]
-		    ],
-			[ 
-				'text', 
-				static::getName('api_key'),
-		        [
-		            'label' => 'Api Key',
-		            'scope' => Element::SCOPE_SHOP,
-		            'value' => $this->getDefault($settings, 'api_key', null),
-		            'description' => 'Provide a Sooqr Api key',
 		            'required' => true
 		        ]
 		    ],
@@ -201,17 +170,17 @@ class ShopwareConfig
 	    //contains all translations
 	    return [
 	        'en_GB' => [
-	            static::getName('generate_xml_time') => 'Time interval between generating xml',
+	            static::getName('time_interval') => 'Time interval between generating xml',
 	            static::getName('account_identifier') => "Account identifier",
 	            static::getName('api_key') => "Api Key",
 	        ],
 	        'de_DE' => [
-	            static::getName('generate_xml_time') => 'Das Zeitintervall zwischen der Generierung xml',
+	            static::getName('time_interval') => 'Das Zeitintervall zwischen der Generierung xml',
 	            static::getName('account_identifier') => "Kontokennung",
 	            static::getName('api_key') => "Api-Schlüssel",
 	        ],
 	        'nl_NL' => [
-	            static::getName('generate_xml_time') => 'Tijd interval tussen het genereren van het xml',
+	            static::getName('time_interval') => 'Tijd interval tussen het genereren van het xml',
 	            static::getName('account_identifier') => "Account identifier",
 	            static::getName('api_key') => "Api Key",
 	        ],

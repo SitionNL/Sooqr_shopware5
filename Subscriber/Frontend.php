@@ -3,6 +3,8 @@
 namespace Shopware\SitionSooqr\Subscriber;
 
 use Enlight\Event\SubscriberInterface;
+use Shopware\SitionSooqr\Components\Log;
+use Shopware\SitionSooqr\Components\SooqrXml;
 
 class Frontend implements SubscriberInterface
 {
@@ -12,7 +14,7 @@ class Frontend implements SubscriberInterface
             // 'Enlight_Controller_Action_PostDispatchSecure_Frontend' => 'onFrontendPostDispatch',
 
             // cron job
-            'Shopware_CronJob_SitionSooqrBuildXml'   => 'onRunSitionSooqrBuildXml'
+            'Shopware_CronJob_SitionSooqrBuildXml'   => 'onRunSitionSooqrBuildXml',
         ];
     }
 
@@ -25,6 +27,14 @@ class Frontend implements SubscriberInterface
 
     public function onRunSitionSooqrBuildXml(\Shopware_Components_Cron_CronJob $job)
     {
+        $sooqr = new SooqrXml;
 
+        $maxSeconds = 2 * 60 * 60; // 2 hours
+
+        if( $sooqr->needBuilding($maxSeconds) )
+        {
+            $echoOutput = false;
+            $sooqr->buildXml($echoOutput);
+        }
     }
 }

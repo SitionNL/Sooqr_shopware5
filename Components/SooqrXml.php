@@ -123,11 +123,14 @@ class SooqrXml
 		}
 	}
 
-	public function needBuilding()
+	public function needBuilding($maxSeconds = null)
 	{
 		if( !file_exists($this->getFilename()) ) return true;
 
-		$maxSeconds = Shopware()->Config()->get(ShopwareConfig::getName('time_interval'), 23 * 60 * 60); // in seconds
+		if( is_null($maxSeconds) )
+		{
+			$maxSeconds = Shopware()->Config()->get(ShopwareConfig::getName('time_interval'), 23 * 60 * 60); // in seconds
+		}
 
 		$lastModified = filemtime($this->getFilename());
 
@@ -315,17 +318,14 @@ class SooqrXml
 		// price is gross, calculate net
 		$price += $price * $taxPercentage / 100;
 
+		$item->addChild("price", round($price, 2));
+
 		if( $pseudoPrice > 0 ) // has a discount
 		{
 			// pseudoPrice is gross, calculate net
 			$pseudoPrice += $pseudoPrice * $taxPercentage / 100;
 
-			$item->addChild("price", round($price, 2));
 			$item->addChild("normal_price", round($pseudoPrice, 2));
-		}
-		else
-		{
-			$item->addChild("price", $price);
 		}
 	}
 

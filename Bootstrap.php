@@ -1,7 +1,7 @@
 <?php
 
 use Shopware\SitionSooqr\Components\ShopwareConfig;
-
+use Shopware\SitionSooqr\Components\Log;
 /**
  * The Bootstrap class is the main entry point of any shopware plugin.
  *
@@ -50,7 +50,7 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
             throw new \RuntimeException('At least Shopware 4.3.0 is required');
         }
 
-        (new ShopwareConfig)->createConfig($this);
+        (new ShopwareConfig($this->config))->createConfig($this);
 
         $this->subscribeEvent(
             'Enlight_Controller_Front_DispatchLoopStartup',
@@ -60,7 +60,46 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
         // register controller
         $this->registerController('frontend', 'SitionSooqr');
 
+        $this->subscribeEvent(
+            "Enlight_Controller_Action_PostDispatchSecure_Frontend",
+            "onSecurePostDispatch"
+        );
+
         return true;
+    }
+
+    public function onSecurePostDispatch(Enlight_Event_EventArgs $arguments)
+    {
+        /**
+         * @var Enlight_Controller_Request_RequestHttp
+         * engine/Library/Enlight/Controller/Request/RequestHttp.php
+         */
+        $request = $arguments->getRequest();
+
+        $controllerName = $request->getControllerName();
+        $actionName = $request->getActionName();
+
+        $config = new ShopwareConfig(Shopware()->Config());
+
+        $controller = $arguments->getSubject();
+        $controller->View()->addTemplateDir($this->Path() . 'Views/');
+        $controller->View()->extendsTemplate('frontend/index/search.tpl');
+        $controller->View()->assign('SooqrAccountId', $config->get('account_identifier'));
+
+        /**@var $controller Shopware_Controllers_Frontend_Listing*/
+        // $controller = $arguments->getSubject();
+
+        // $controller->View()->addTemplateDir($this->Path() . 'Views/common/');
+
+        // if (Shopware()->Shop()->getTemplate()->getVersion() >= 3)
+        // {
+        //     $controller->View()->addTemplateDir($this->Path() . 'Views/responsive/');
+        // } 
+        // else 
+        // {
+        //     $controller->View()->addTemplateDir($this->Path() . 'Views/emotion/');
+        //     $controller->View()->extendsTemplate('frontend/index/sooqr-search.tpl');
+        // }
     }
 
     public function afterInit()
@@ -77,10 +116,8 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
     {
         $this->registerMyComponents();
                 
-
         $subscribers = array(
             new \Shopware\SitionSooqr\Subscriber\Frontend()
-
         );
 
         foreach ($subscribers as $subscriber) {
