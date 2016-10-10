@@ -162,6 +162,16 @@ class ShopwareConfig
 		            'description' => 'Provide the ids of the categories where the main categories belong to'
 		        ]
 		    ],
+			[ 
+				'text', 
+				static::getName('add_client_side_script'),
+		        [
+		            'label' => 'Override searchbar (yes/no)',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'add_client_side_script', "no"),
+		            'description' => "If this config option is 'yes', the searchbar on the frontend get overwritten by Sooqr search"
+		        ]
+		    ],
 		];
 	}
 

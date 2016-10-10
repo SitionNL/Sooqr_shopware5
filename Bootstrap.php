@@ -81,10 +81,13 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
 
         $config = new ShopwareConfig(Shopware()->Config());
 
-        $controller = $arguments->getSubject();
-        $controller->View()->addTemplateDir($this->Path() . 'Views/');
-        $controller->View()->extendsTemplate('frontend/index/search.tpl');
-        $controller->View()->assign('SooqrAccountId', $config->get('account_identifier'));
+        if( in_array($config->get('add_client_side_script'), [ "yes", "1", "true", "ja" ]) )
+        {
+            $controller = $arguments->getSubject();
+            $controller->View()->addTemplateDir($this->Path() . 'Views/');
+            $controller->View()->extendsTemplate('frontend/index/search.tpl');
+            $controller->View()->assign('SooqrAccountId', $config->get('account_identifier'));
+        }
 
         /**@var $controller Shopware_Controllers_Frontend_Listing*/
         // $controller = $arguments->getSubject();
