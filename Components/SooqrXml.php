@@ -239,7 +239,7 @@ class SooqrXml
 
 		$db = Shopware()->Db();
 
-		$sql = "SELECT path FROM s_core_rewrite_urls WHERE org_path = :org_path AND main_id = 1";
+		$sql = "SELECT path FROM s_core_rewrite_urls WHERE org_path = :org_path AND main = 1";
 		$params = [ ":org_path" => "sViewport=detail&sArticle={$articleId}" ];
 
 		$query = $db->executeQuery($sql, $params);
