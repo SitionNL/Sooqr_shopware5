@@ -125,6 +125,7 @@ class SooqrXml
 
 	public function needBuilding($maxSeconds = null)
 	{
+		return true;
 		if( !file_exists($this->getFilename()) ) return true;
 
 		if( is_null($maxSeconds) )
@@ -358,7 +359,7 @@ class SooqrXml
 
 				if( count($groupOptions) === 1 )
 				{
-					$item->addChildWithCDATA($this->escapeXmlTag($group->getName()), $groupOptions[0]);
+					$item->addChildIfNotEmpty($this->escapeXmlTag($group->getName()), $groupOptions[0]);
 				}
 				else if( count($groupOptions) > 1 )
 				{
@@ -366,7 +367,7 @@ class SooqrXml
 
 					foreach( $groupOptions as $key => $groupOption ) 
 					{
-						$groupItem->addChildWithCDATA($this->escapeXmlTag($group->getName()), $groupOption);
+						$groupItem->addChildIfNotEmpty($this->escapeXmlTag($group->getName()), $groupOption);
 					}
 				}
 			} else {
@@ -404,7 +405,7 @@ class SooqrXml
 
 				if( count($optionValues) === 1 )
 				{
-					$item->addChildWithCDATA($this->escapeXmlTag($option->getName()), $optionValues[0]);
+					$item->addChildIfNotEmpty($this->escapeXmlTag($option->getName()), $optionValues[0]);
 				}
 				else if( count($optionValues) > 1 )
 				{
@@ -412,7 +413,7 @@ class SooqrXml
 
 					foreach( $optionValues as $key => $groupOption ) 
 					{
-						$groupItem->addChildWithCDATA($this->escapeXmlTag($option->getName()), $groupOption);
+						$groupItem->addChildIfNotEmpty($this->escapeXmlTag($option->getName()), $groupOption);
 					}
 				}
 			} else {
@@ -454,12 +455,12 @@ class SooqrXml
 
 			foreach( $xmlCategories as $key => $category ) 
 			{
-				$categoriesElement->addChildWithCDATA('category', $category);
+				$categoriesElement->addChildIfNotEmpty('category', $category);
 			}
 		} 
 		else 
 		{
-			$item->addChildWithCDATA('category', isset($xmlCategories[0]) ? $xmlCategories[0] : "");
+			$item->addChildIfNotEmpty('category', isset($xmlCategories[0]) ? $xmlCategories[0] : "");
 		}
 
 		if( count($xmlSubCategories) > 1 )
@@ -468,12 +469,38 @@ class SooqrXml
 
 			foreach( $xmlSubCategories as $key => $subCategory ) 
 			{
-				$subCategoriesElement->addChildWithCDATA('subcategory', $subCategory);
+				$subCategoriesElement->addChildIfNotEmpty('subcategory', $subCategory);
 			}
 		} 
 		else 
 		{
-			$item->addChildWithCDATA('subcategory', isset($xmlSubCategories[0]) ? $xmlSubCategories[0] : "");
+			$item->addChildIfNotEmpty('subcategory', isset($xmlSubCategories[0]) ? $xmlSubCategories[0] : "");
+		}
+	}
+
+	/**
+	 * Get info from s_articles_attributes table
+	 */
+	public function getExtraAttributes($item, $mainDetail)
+	{
+		$attribute = $mainDetail->getAttribute();
+
+		if( !empty($attribute) )
+		{
+			for ($i=0; $i < 20; $i++) 
+			{
+				$method = "getAttr{$i}";
+				
+				if( method_exists($attribute, $method) )
+				{
+					$value = trim($attribute->{$method}());
+
+					if( !empty($value) )
+					{
+						$item->addChildIfNotEmpty("attribute{$i}", $value);
+					}
+				}
+			}
 		}
 	}
 
@@ -485,10 +512,22 @@ class SooqrXml
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChild("id", $mainDetail->getNumber());
-		$item->addChildWithCDATA("name", $article->getName());
-		$item->addChildWithCDATA("description", $article->getDescription());
-		$item->addChildWithCDATA("supplier", $supplier ? $supplier->getName() : "");
-		$item->addChildWithCDATA("supplier_number", $mainDetail->getSupplierNumber());
+		$item->addChildIfNotEmpty("name", $article->getName());
+		$item->addChildIfNotEmpty("description", $article->getDescription());
+		$item->addChildIfNotEmpty("description_long", $article->getDescriptionLong());
+		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
+		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
+
+		$item->addChildIfNotEmpty("supplier", $supplier ? $supplier->getName() : "");
+
+		$item->addChildIfNotEmpty("supplier_number", $mainDetail->getSupplierNumber());
+		$item->addChildIfNotEmpty("ean", $mainDetail->getEan());
+		$item->addChildIfNotEmpty("width", $mainDetail->getWidth());
+		$item->addChildIfNotEmpty("height", $mainDetail->getHeight());
+		$item->addChildIfNotEmpty("weight", $mainDetail->getWeight());
+		$item->addChildIfNotEmpty("length", $mainDetail->getLen());
+		$item->addChildIfNotEmpty("additional_text", $mainDetail->getAdditionalText());
+		
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
 		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
 
@@ -496,6 +535,7 @@ class SooqrXml
 		$this->getConfiguratorOptions($item, $article);
 		$this->getFilterValues($item, $article);
 		$this->getCategories($item, $article);
+		$this->getExtraAttributes($item, $mainDetail);
 
 		// return xml element without the xml header
 		$dom = dom_import_simplexml($item);

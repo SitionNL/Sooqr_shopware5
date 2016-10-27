@@ -12,7 +12,8 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	* @param  string  $name
 	* @param  string  $value
 	*/
-	public function addChildWithCDATA($name, $value = null) {
+	public function addChildWithCDATA($name, $value = null) 
+	{
 		$newChild = $this->addChild($name);
 
 		if( $newChild !== null ) 
@@ -23,5 +24,34 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		}
 
 		return $newChild;
+	}
+
+	/**
+	 * Only add node when the value is a real value
+	 * 
+	 * Check if value contains forbidden characters
+	 * If not add without cdata
+	 */
+	public function addChildIfNotEmpty($name, $value = null)
+	{
+		$value = trim($value);
+		if( empty($value) ) return null;
+
+		if( $this->isXmlSafe($value) )
+		{
+			return $this->addChild($name, $value);
+		}
+		else
+		{
+			return $this->addChildWithCDATA($name, $value);
+		}
+	}
+
+	/**
+	 * Check if value needs escaping
+	 */
+	public function isXmlSafe($value)
+	{
+		return htmlspecialchars($value) === $value;
 	}
 }
