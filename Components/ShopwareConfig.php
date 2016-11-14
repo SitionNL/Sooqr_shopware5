@@ -19,7 +19,7 @@ class ShopwareConfig
 	public function get($key, $default = null)
 	{
 		$namedKey = static::getName($key);
-		return $this->config->get( (in_array($namedKey, $this->getElementKeys()) ? $namedKey : $key), $default );	
+		return $this->config->get( (in_array($namedKey, $this->getElementKeys()) ? $namedKey : $key), $default );
 	}
 
 	public function getConfigShop($shopId = null)

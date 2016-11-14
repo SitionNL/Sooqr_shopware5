@@ -36,6 +36,14 @@ class SooqrXml
 	 */
 	protected $db;
 
+	/**
+	 * Array to cache some variables
+	 * @var array
+	 */
+	protected $cache = [
+		'config' => []
+	];
+
 	public function __construct()
 	{
 		set_time_limit(60 * 60); // 1 hour
@@ -125,7 +133,6 @@ class SooqrXml
 
 	public function needBuilding($maxSeconds = null)
 	{
-		return true;
 		if( !file_exists($this->getFilename()) ) return true;
 
 		if( is_null($maxSeconds) )
@@ -157,6 +164,18 @@ class SooqrXml
 		return $qb->getQuery()->getSingleScalarResult();
 	}
 
+	public function hideNoInstockConfig()
+	{
+		if( !isset($this->cache['config']) ) $this->cache['config'] = [];
+
+		if( !isset($this->cache['config']['hideNoInstock']) )
+		{
+			$this->cache['config']['hideNoInstock'] = !!$this->config->get('hideNoInstock');
+		}
+
+		return $this->cache['config']['hideNoInstock'];
+	}
+
 	public function iterateArticles(callable $cb)
 	{
 		// http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/batch-processing.html
@@ -166,6 +185,28 @@ class SooqrXml
 
 		$dql = "SELECT a FROM Shopware\Models\Article\Article a " .
 			"WHERE a.active = 1 ";
+
+		// if articles without stock should be hidden,
+		// get all article ids of articles that have no stock
+		// then check the articles are not in the articleIds
+		if( $this->hideNoInstockConfig() )
+		{
+			$articleIds = array_map(
+				function($row) { return $row['articleID']; },
+				$this->db->executeQuery(
+					// get the id for articles where no detail has any stock
+					"SELECT articleID FROM s_articles_details " .
+					"GROUP BY articleID " .
+					"HAVING SUM(instock) < 1"
+				)->fetchAll()
+			);
+
+			// build IN query
+			$articleIds = implode(",", $articleIds);
+			$dql .= "AND a.id NOT IN ({$articleIds})";
+
+			$articleIds = null;
+		}
 
 		$q = $this->em->createQuery($dql);
 
