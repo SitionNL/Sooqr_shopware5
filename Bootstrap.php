@@ -83,10 +83,14 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
 
         if( in_array(trim($config->get('add_client_side_script')), [ "yes", "1", "true", "ja" ]) )
         {
+            $sooqrAccountId = trim($config->get('account_identifier'));
+            $jsSnippets = $config->get('options_client_side_script');
+
             $controller = $arguments->getSubject();
             $controller->View()->addTemplateDir($this->Path() . 'Views/');
             $controller->View()->extendsTemplate('frontend/index/search.tpl');
-            $controller->View()->assign('SooqrAccountId', $config->get('account_identifier'));
+            $controller->View()->assign('sooqrAccountId', $sooqrAccountId);
+            $controller->View()->assign('jsSnippets', $jsSnippets);
         }
 
         /**@var $controller Shopware_Controllers_Frontend_Listing*/

@@ -172,6 +172,16 @@ class ShopwareConfig
 		            'description' => "If this config option is 'yes', the searchbar on the frontend get overwritten by Sooqr search"
 		        ]
 		    ],
+			[ 
+				'textarea', 
+				static::getName('options_client_side_script'),
+		        [
+		            'label' => 'Custom JS',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'options_client_side_script', "// For more information: http://support.sooqr.com/results-overlay/sooqr-javascript-snippet \n_wssq.push(['suggest._setPosition', 'screen-middle', { top:0 } ]);"),
+		            'description' => "Provide extra options for the sooqr searchbar. Add options to the '_wssq' array"
+		        ]
+		    ],
 		];
 	}
 

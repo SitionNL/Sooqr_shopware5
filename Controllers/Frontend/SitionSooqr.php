@@ -3,6 +3,7 @@
 use Shopware\SitionSooqr\Components\Log;
 use Shopware\SitionSooqr\Components\SooqrXml;
 use Shopware\SitionSooqr\Components\Helpers;
+use Shopware\SitionSooqr\Components\ShopwareConfig;
 
 class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Action
 {
@@ -32,9 +33,13 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 		$currency = $currentShop->getCurrency();
 		$locale = $currentShop->getLocale();
 
+        $config = new ShopwareConfig(Shopware()->Config());
+
+		$searchEnabled = in_array(trim($config->get('add_client_side_script')), [ "yes", "1", "true", "ja" ]);
+
 		$arr = [
 			"search" => [
-				"enabled" => "0"
+				"enabled" => $searchEnabled ? "1" : "0"
 			],
 			"feeds" => [
 				// "name" => $currentShop->getName(),
