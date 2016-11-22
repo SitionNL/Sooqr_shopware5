@@ -3,6 +3,12 @@ SitionSooqr
 
 Generates a xml for [Sooqr](https://www.sooqr.com/)
 
+## Overview
+
+With this module you can generate a xml feed for Sooqr. 
+Sooqr can read this feed and generates a fast search for your shop.
+You can then enable this feed in your Shopware shop.
+
 ## Urls
 
 ** Installation url: **
@@ -11,7 +17,7 @@ Generates a xml for [Sooqr](https://www.sooqr.com/)
 ** Url to xml feed: **
 `http://<domain>/<subshop_virtual_url>/frontend/sition_sooqr/xml`
 
-# Installation
+## Installation
 
 1. Fill in the form to apply for a Sooqr account at [Sooqr signup](https://www.sooqr.com/sign-up/sooqr-commerce-search)
 2. Let Sooqr contact you, and get an account for Sooqr, provide the installation url to Sooqr
