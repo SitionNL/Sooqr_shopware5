@@ -81,7 +81,7 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
 
         $config = new ShopwareConfig(Shopware()->Config());
 
-        if( in_array($config->get('add_client_side_script'), [ "yes", "1", "true", "ja" ]) )
+        if( in_array(trim($config->get('add_client_side_script')), [ "yes", "1", "true", "ja" ]) )
         {
             $controller = $arguments->getSubject();
             $controller->View()->addTemplateDir($this->Path() . 'Views/');
