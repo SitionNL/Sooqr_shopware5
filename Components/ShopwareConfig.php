@@ -11,7 +11,7 @@ class ShopwareConfig
 
 	protected $config;
 
-	public function __construct(Shopware_Components_Config $config)
+	public function __construct($config = null)
 	{
 		$this->config = $config;
 	}
