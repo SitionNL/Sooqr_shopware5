@@ -518,7 +518,7 @@ class SooqrXml
 
 	public function getCategories($item, $article)
 	{
-		$categoryParents = array_map(explode(Shopware()->Config()->get(ShopwareConfig::getName('category_parents'), "1"), ","), function($parent) { return (int)trim($parent); });
+		$categoryParents = array_map(function($parent) { return (int)trim($parent); }, explode(',', Shopware()->Config()->get(ShopwareConfig::getName('category_parents'), "1")));
 
 		$articleCategories = $article->getCategories();
 
