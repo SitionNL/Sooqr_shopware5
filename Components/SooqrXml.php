@@ -62,6 +62,9 @@ class SooqrXml
 		$this->config = Shopware()->Config();
 		$this->db = Shopware()->Db();
 		$this->pluginJson = new PluginJson;
+
+		SimpleXMLElement::addNamespace('sqr', "http://base.sooqr.com/ns/1.0");
+		SimpleXMLElement::addNamespace('g', "http://base.google.com/ns/1.0");
 	}
 
 	public function currentShopId()
@@ -157,20 +160,6 @@ class SooqrXml
 		return $this->em->getRepository('Shopware\Models\Article\Article');
 	}
 
-	/**
-	 * Get active articles count
-	 * @return  int  number of active articles
-	 */
-	public function getNumberOfArticles()
-	{
-		$qb = $this->em->createQueryBuilder();
-		$qb->select($qb->expr()->count('a.id'));
-		$qb->from('Shopware\Models\Article\Article', 'a');
-		$qb->where("a.active = 1");
-
-		return $qb->getQuery()->getSingleScalarResult();
-	}
-
 	public function hideNoInstockConfig()
 	{
 		if( !isset($this->cache['config']) ) $this->cache['config'] = [];
@@ -193,11 +182,11 @@ class SooqrXml
 
 	public function totalArticles()
 	{
-		$sql = "SELECT count(*) AS count FROM s_articles";
+		$sql = "SELECT count(*) AS count FROM s_articles WHERE active = 1";
 
 		if( $this->hideNoInstockConfig() )
 		{
-			$sql .= ' WHERE id NOT IN (SELECT articleID FROM s_articles_details GROUP BY articleID HAVING SUM(instock) < 1)';
+			$sql .= ' AND id NOT IN (SELECT articleID FROM s_articles_details GROUP BY articleID HAVING SUM(instock) < 1)';
 		}
 
 		$result = $this->db->executeQuery($sql)->fetch();
@@ -364,6 +353,14 @@ class SooqrXml
 	    return $newUrl;
 	}
 
+	public function xmlNs()
+	{
+		return [
+			'sqr' => 'http://base.sooqr.com/ns/1.0',
+			'g' => 'http://base.google.com/ns/1.0'
+		];
+	}
+
 	public function getXmlHeader()
 	{
 		$config = [
@@ -387,7 +384,7 @@ class SooqrXml
 
 		foreach ($config as $key => $value)
 		{
-			$configElement->addChildEscape("sqr:{$key}", $value);
+			$configElement->addChild("sqr:{$key}", $value, $this->xmlNs()['sqr']);
 		}
 
 		$header .= $configElement->toElementString();
@@ -416,14 +413,14 @@ class SooqrXml
 		// price is gross, calculate net
 		$price += $price * $taxPercentage / 100;
 
-		$item->addChild("price", round($price, 2));
+		$item->addChild("sqr:price", round($price, 2));
 
 		if( $pseudoPrice > 0 ) // has a discount
 		{
 			// pseudoPrice is gross, calculate net
 			$pseudoPrice += $pseudoPrice * $taxPercentage / 100;
 
-			$item->addChild("normal_price", round($pseudoPrice, 2));
+			$item->addChild("sqr:normal_price", round($pseudoPrice, 2));
 		}
 	}
 
@@ -456,19 +453,19 @@ class SooqrXml
 
 				if( count($groupOptions) === 1 )
 				{
-					$item->addChildIfNotEmpty($this->escapeXmlTag($group->getName()), $groupOptions[0]);
+					$item->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($group->getName()), $groupOptions[0]);
 				}
 				else if( count($groupOptions) > 1 )
 				{
-					$groupItem = $item->addChild($this->escapeXmlTag($group->getName() . "s"));
+					$groupItem = $item->addChild('sqr:' . $this->escapeXmlTag($group->getName() . "s"));
 
-					foreach( $groupOptions as $key => $groupOption ) 
+					foreach( $groupOptions as $key => $groupOption )
 					{
-						$groupItem->addChildIfNotEmpty($this->escapeXmlTag($group->getName()), $groupOption);
+						$groupItem->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($group->getName()), $groupOption);
 					}
 				}
 			} else {
-				$item->addChild($this->escapeXmlTag($group->getName()), "");
+				$item->addChild('sqr:' . $this->escapeXmlTag($group->getName()), "");
 			}
 		}
 	}
@@ -502,19 +499,19 @@ class SooqrXml
 
 				if( count($optionValues) === 1 )
 				{
-					$item->addChildIfNotEmpty($this->escapeXmlTag($option->getName()), $optionValues[0]);
+					$item->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($option->getName()), $optionValues[0]);
 				}
 				else if( count($optionValues) > 1 )
 				{
-					$groupItem = $item->addChild($this->escapeXmlTag($option->getName() . "s"));
+					$groupItem = $item->addChild('sqr:' . $this->escapeXmlTag($option->getName() . "s"));
 
 					foreach( $optionValues as $key => $groupOption ) 
 					{
-						$groupItem->addChildIfNotEmpty($this->escapeXmlTag($option->getName()), $groupOption);
+						$groupItem->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($option->getName()), $groupOption);
 					}
 				}
 			} else {
-				// $item->addChild($this->escapeXmlTag($option->getName()), "");
+				// $item->addChild('sqr:' . $this->escapeXmlTag($option->getName()), "");
 			}
 		}
 	}
@@ -608,25 +605,25 @@ class SooqrXml
 
 		$item = new SimpleXMLElement("<item></item>");
 
-		$item->addChild("id", $mainDetail->getNumber());
-		$item->addChildIfNotEmpty("title", $article->getName());
-		$item->addChildIfNotEmpty("description_short", $article->getDescription());
-		$item->addChildIfNotEmpty("description", $article->getDescriptionLong());
-		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
-		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
+		$item->addChild("sqr:id", $mainDetail->getNumber());
+		$item->addChildIfNotEmpty("sqr:title", $article->getName());
+		$item->addChildIfNotEmpty("sqr:description_short", $article->getDescription());
+		$item->addChildIfNotEmpty("sqr:description", $article->getDescriptionLong());
+		$item->addChildIfNotEmpty("sqr:meta_title", $article->getMetaTitle());
+		$item->addChildIfNotEmpty("sqr:keywords", $article->getKeywords());
 
-		$item->addChildIfNotEmpty("brand", $supplier ? $supplier->getName() : "");
+		$item->addChildIfNotEmpty("sqr:brand", $supplier ? $supplier->getName() : "");
 
-		$item->addChildIfNotEmpty("supplier_number", $mainDetail->getSupplierNumber());
-		$item->addChildIfNotEmpty("ean", $mainDetail->getEan());
-		$item->addChildIfNotEmpty("width", $mainDetail->getWidth());
-		$item->addChildIfNotEmpty("height", $mainDetail->getHeight());
-		$item->addChildIfNotEmpty("weight", $mainDetail->getWeight());
-		$item->addChildIfNotEmpty("length", $mainDetail->getLen());
-		$item->addChildIfNotEmpty("additional_text", $mainDetail->getAdditionalText());
+		$item->addChildIfNotEmpty("sqr:supplier_number", $mainDetail->getSupplierNumber());
+		$item->addChildIfNotEmpty("sqr:ean", $mainDetail->getEan());
+		$item->addChildIfNotEmpty("sqr:width", $mainDetail->getWidth());
+		$item->addChildIfNotEmpty("sqr:height", $mainDetail->getHeight());
+		$item->addChildIfNotEmpty("sqr:weight", $mainDetail->getWeight());
+		$item->addChildIfNotEmpty("sqr:length", $mainDetail->getLen());
+		$item->addChildIfNotEmpty("sqr:additional_text", $mainDetail->getAdditionalText());
 		
-		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
-		$item->addChildWithCDATA("image_link", $this->getImageurlForArticle($article));
+		$item->addChildWithCDATA("sqr:url", $this->getUrlForArticle($article));
+		$item->addChildWithCDATA("sqr:image_link", $this->getImageurlForArticle($article));
 
 		$this->getPrice($item, $article);
 		$this->getConfiguratorOptions($item, $article);
@@ -674,7 +671,7 @@ class SooqrXml
 		return $str;
 	}
 
-	public function buildXml($echo = false)
+	public function buildXml($echo = false, $force = false)
 	{
 		$acquired = $this->lock->waitTillAcquired();
 
@@ -683,7 +680,7 @@ class SooqrXml
 		// if a lock wasn't acquired at first, 
 		// the xml is probably already build again, 
 		// so test again if it needs to be build
-		if( !$this->needBuilding() )
+		if( !$force && !$this->needBuilding() )
 		{
 			if( $echo ) $this->echoFileChunked($this->getFilename());
 		}
@@ -736,7 +733,7 @@ class SooqrXml
 		return $this->getGzFilename();
 	}
 
-	public function outputXml($gzip = false)
+	public function outputXml($force = false, $gzip = false)
 	{
 		$filename = $this->getFilename();
 
@@ -750,10 +747,10 @@ class SooqrXml
 		{
 			header('Content-Type: application/xml');
 
-			if( $this->needBuilding() )
+			if( $force || $this->needBuilding() )
 			{
 				$echoOutput = true;
-				$this->buildXml($echoOutput);
+				$this->buildXml($echoOutput, $force);
 			} 
 			else 
 			{

@@ -6,6 +6,47 @@ use SimpleXMLElement;
 
 Class SimpleXMLElementExtended extends SimpleXMLElement {
 
+	static $namespaces = [];
+
+	public static function addNamespace($ns, $url)
+	{
+		static::$namespaces[$ns] = $url;
+	}
+
+	public static function getNamespace($ns)
+	{
+		return static::$namespaces[$ns];
+	}
+
+	public static function getNamespaceXmlns()
+	{
+		$xmlns = [];
+
+		foreach (static::$namespaces as $ns => $url) 
+		{
+			$xmlns[] = "xmlns:{$ns}=\"{$url}\"";
+		}
+
+		return $xmlns;
+	}
+
+	/**
+	 * addChild normally removes namespaces from the name it doesn't know
+	 * This makes it know the namespace, so it doesn't delete it
+	 */
+	public function addChildNs($name, $value)
+	{
+		if( stripos($name, ':') )
+		{
+			$parts = explode(':', $name);
+			$ns = $parts[0];
+
+			return $this->addChild($name, $value, static::getNamespace($ns));
+		}
+
+		return $this->addChild($name, $value);
+	}
+
 	/**
 	* Adds a child with $value inside CDATA
 	* http://stackoverflow.com/questions/6260224/how-to-write-cdata-using-simplexmlelement
@@ -14,7 +55,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	*/
 	public function addChildWithCDATA($name, $value = null) 
 	{
-		$newChild = $this->addChild($name);
+		$newChild = $this->addChildNs($name);
 
 		if( $newChild !== null ) 
 		{
@@ -30,7 +71,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	{
 		if( $this->isXmlSafe($value) )
 		{
-			return $this->addChild($name, $value);
+			return $this->addChildNs($name, $value);
 		}
 		else
 		{
@@ -68,6 +109,11 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	{
 		// return xml element without the xml header
 		$dom = dom_import_simplexml($this);
-		return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+		$element = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+
+		// remove namespaces on single elements
+		$element = str_replace(static::getNamespaceXmlns(), '', $element);
+
+		return $element;
 	}
 }

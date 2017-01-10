@@ -7,11 +7,15 @@ use Shopware\SitionSooqr\Components\ShopwareConfig;
 
 class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Action
 {
-	public function xmlAction() 
+	public function xmlAction($args) 
 	{
+		$request = $this->Request();
+
+		$force = empty($request->get('force')) ? false : true;
+
 		$sooqr = new SooqrXml;
 
-		$sooqr->outputXml();
+		$sooqr->outputXml($force);
 
 		// exit request, don't render a view
 		exit();
