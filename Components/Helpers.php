@@ -53,4 +53,19 @@ class Helpers
 	    return $arr;
 	}
 
+	public function randomString($length = 10)
+	{
+		$chars = str_split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
+
+		$string = '';
+
+		for ($i=0; $i < $length; $i++) 
+		{
+			$index = rand(0, count($chars) - 1);
+			$string .= $chars[$index];
+		}
+
+		return $string;
+	}
+
 }

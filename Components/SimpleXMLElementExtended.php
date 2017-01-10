@@ -26,17 +26,8 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		return $newChild;
 	}
 
-	/**
-	 * Only add node when the value is a real value
-	 * 
-	 * Check if value contains forbidden characters
-	 * If not add without cdata
-	 */
-	public function addChildIfNotEmpty($name, $value = null)
+	public function addChildEscape($name, $value = null)
 	{
-		$value = trim($value);
-		if( empty($value) ) return null;
-
 		if( $this->isXmlSafe($value) )
 		{
 			return $this->addChild($name, $value);
@@ -48,10 +39,35 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	}
 
 	/**
+	 * Only add node when the value is a real value
+	 * 
+	 * Check if value contains forbidden characters
+	 * If not add without cdata
+	 */
+	public function addChildIfNotEmpty($name, $value = null)
+	{
+		$value = trim($value);
+		if( empty($value) ) return null;
+
+		return $this->addChildEscape($name, $value);
+	}
+
+	/**
 	 * Check if value needs escaping
 	 */
 	public function isXmlSafe($value)
 	{
 		return htmlspecialchars($value) === $value;
+	}
+
+	/**
+	 * Output element and all subnodes as string
+	 * Don't output a xml header
+	 */
+	public function toElementString()
+	{
+		// return xml element without the xml header
+		$dom = dom_import_simplexml($this);
+		return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
 	}
 }

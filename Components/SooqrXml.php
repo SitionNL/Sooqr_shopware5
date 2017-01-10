@@ -8,6 +8,7 @@ use Shopware\SitionSooqr\Components\Locking;
 use Shopware\SitionSooqr\Components\Gzip;
 use Shopware\SitionSooqr\Components\ShopwareConfig;
 use Shopware\SitionSooqr\Components\Helpers;
+use Shopware\SitionSooqr\Components\PluginJson;
 
 class SooqrXml
 {
@@ -37,6 +38,11 @@ class SooqrXml
 	protected $db;
 
 	/**
+	 * @var Shopware\SitionSooqr\Components\PluginJson
+	 */
+	protected $pluginJson;
+
+	/**
 	 * Array to cache some variables
 	 * @var array
 	 */
@@ -55,6 +61,7 @@ class SooqrXml
 		$this->shop = Shopware()->Shop();
 		$this->config = Shopware()->Config();
 		$this->db = Shopware()->Db();
+		$this->pluginJson = new PluginJson;
 	}
 
 	public function currentShopId()
@@ -174,6 +181,27 @@ class SooqrXml
 		}
 
 		return $this->cache['config']['hideNoInstock'];
+	}
+
+	public function totalArticleDetails()
+	{
+		$sql = "SELECT count(*) AS count FROM s_articles_details" . ($this->hideNoInstockConfig() ? " WHERE instock > 0" : "");
+
+		$result = $this->db->executeQuery($sql)->fetch();
+		return empty($result['count']) ? 0 : $result['count'];
+	}
+
+	public function totalArticles()
+	{
+		$sql = "SELECT count(*) AS count FROM s_articles";
+
+		if( $this->hideNoInstockConfig() )
+		{
+			$sql .= ' WHERE id NOT IN (SELECT articleID FROM s_articles_details GROUP BY articleID HAVING SUM(instock) < 1)';
+		}
+
+		$result = $this->db->executeQuery($sql)->fetch();
+		return empty($result['count']) ? 0 : $result['count'];
 	}
 
 	public function iterateArticles(callable $cb)
@@ -338,12 +366,40 @@ class SooqrXml
 
 	public function getXmlHeader()
 	{
-		return "<?xml version=\"1.0\" standalone=\"yes\"?>\n<items>";
+		$config = [
+			'system' => 'Shopware',
+			'extension' => $this->pluginJson->getLabel('en'),
+			'extension_version' => $this->pluginJson->getVersion(),
+			'store' => $this->shop->getName(),
+			'url' => $this->getShopBaseUrl(),
+			'token' => Helpers::randomString(16),
+			'products_total' => $this->totalArticles(),
+			'product_details_total' => $this->totalArticleDetails(),
+			'products_limit' => 0,
+			'date_created' => date('Y-m-d H:i:s'),
+			'processing_time' => 0
+		];
+
+		$header  = "<?xml version=\"1.0\" encoding=\"utf-8\"?>";
+		$header .= "<rss xmlns:g=\"http://base.google.com/ns/1.0\" xmlns:sqr=\"http://base.sooqr.com/ns/1.0\" version=\"2.0\">";
+
+		$configElement = new SimpleXMLElement("<config></config>");
+
+		foreach ($config as $key => $value)
+		{
+			$configElement->addChildEscape("sqr:{$key}", $value);
+		}
+
+		$header .= $configElement->toElementString();
+
+		$header .= "<products>";
+
+		return $header;
 	}
 
 	public function getXmlFooter()
 	{
-		return "</items>";
+		return "</products></rss>";
 	}
 
 	protected function getPrice($item, $article)
@@ -553,13 +609,13 @@ class SooqrXml
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChild("id", $mainDetail->getNumber());
-		$item->addChildIfNotEmpty("name", $article->getName());
-		$item->addChildIfNotEmpty("description", $article->getDescription());
-		$item->addChildIfNotEmpty("description_long", $article->getDescriptionLong());
+		$item->addChildIfNotEmpty("title", $article->getName());
+		$item->addChildIfNotEmpty("description_short", $article->getDescription());
+		$item->addChildIfNotEmpty("description", $article->getDescriptionLong());
 		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
 		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
 
-		$item->addChildIfNotEmpty("supplier", $supplier ? $supplier->getName() : "");
+		$item->addChildIfNotEmpty("brand", $supplier ? $supplier->getName() : "");
 
 		$item->addChildIfNotEmpty("supplier_number", $mainDetail->getSupplierNumber());
 		$item->addChildIfNotEmpty("ean", $mainDetail->getEan());
@@ -570,7 +626,7 @@ class SooqrXml
 		$item->addChildIfNotEmpty("additional_text", $mainDetail->getAdditionalText());
 		
 		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
-		$item->addChildWithCDATA("imageurl", $this->getImageurlForArticle($article));
+		$item->addChildWithCDATA("image_link", $this->getImageurlForArticle($article));
 
 		$this->getPrice($item, $article);
 		$this->getConfiguratorOptions($item, $article);
@@ -579,8 +635,9 @@ class SooqrXml
 		$this->getExtraAttributes($item, $mainDetail);
 
 		// return xml element without the xml header
-		$dom = dom_import_simplexml($item);
-		return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+		// $dom = dom_import_simplexml($item);
+		// return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
+		return $item->toElementString();
 	}
 
 	protected function echoDirect($buffer)
@@ -651,7 +708,6 @@ class SooqrXml
 		}
 
 		$this->lock->removeLock();
-
 	}
 
 	public function buildGz()
