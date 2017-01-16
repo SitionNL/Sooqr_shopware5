@@ -63,8 +63,12 @@ class SooqrXml
 		$this->db = Shopware()->Db();
 		$this->pluginJson = new PluginJson;
 
+		// add namespaces, so they can be used in the generation of xml snippets
 		SimpleXMLElement::addNamespace('sqr', "http://base.sooqr.com/ns/1.0");
 		SimpleXMLElement::addNamespace('g', "http://base.google.com/ns/1.0");
+
+		// set name of child element that is created when a node has multiple values
+		SimpleXMLElement::setChildNodeName('sqr:node');
 	}
 
 	public function currentShopId()
@@ -353,14 +357,6 @@ class SooqrXml
 	    return $newUrl;
 	}
 
-	public function xmlNs()
-	{
-		return [
-			'sqr' => 'http://base.sooqr.com/ns/1.0',
-			'g' => 'http://base.google.com/ns/1.0'
-		];
-	}
-
 	public function getXmlHeader()
 	{
 		$config = [
@@ -384,7 +380,7 @@ class SooqrXml
 
 		foreach ($config as $key => $value)
 		{
-			$configElement->addChild("sqr:{$key}", $value, $this->xmlNs()['sqr']);
+			$configElement->addChild("sqr:{$key}", $value);
 		}
 
 		$header .= $configElement->toElementString();
@@ -605,7 +601,7 @@ class SooqrXml
 
 		$item = new SimpleXMLElement("<item></item>");
 
-		$item->addChild("sqr:id", $mainDetail->getNumber());
+		$item->addChildEscape("sqr:id", $mainDetail->getNumber());
 		$item->addChildIfNotEmpty("sqr:title", $article->getName());
 		$item->addChildIfNotEmpty("sqr:description_short", $article->getDescription());
 		$item->addChildIfNotEmpty("sqr:description", $article->getDescriptionLong());
@@ -632,8 +628,6 @@ class SooqrXml
 		$this->getExtraAttributes($item, $mainDetail);
 
 		// return xml element without the xml header
-		// $dom = dom_import_simplexml($item);
-		// return $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
 		return $item->toElementString();
 	}
 

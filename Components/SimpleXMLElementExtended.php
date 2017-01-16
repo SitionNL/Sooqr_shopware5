@@ -7,6 +7,7 @@ use SimpleXMLElement;
 Class SimpleXMLElementExtended extends SimpleXMLElement {
 
 	static $namespaces = [];
+	static $childNodeName = 'node';
 
 	public static function addNamespace($ns, $url)
 	{
@@ -30,21 +31,32 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		return $xmlns;
 	}
 
+	public static function setChildNodeName($name)
+	{
+		static::$childNodeName = $name;
+	}
+
+	public static function setChildNodeName()
+	{
+		return static::$childNodeName;
+	}
+
 	/**
 	 * addChild normally removes namespaces from the name it doesn't know
-	 * This makes it know the namespace, so it doesn't delete it
+	 * This makes it know the namespace, so it doesn't delete it,
+	 * This makes it possible to generate xml snippets, instead of generating the xml in one go
 	 */
-	public function addChildNs($name, $value)
+	public function addChildNs($name, $value = '')
 	{
 		if( stripos($name, ':') )
 		{
 			$parts = explode(':', $name);
 			$ns = $parts[0];
 
-			return $this->addChild($name, $value, static::getNamespace($ns));
+			return parent::addChild($name, $value, static::getNamespace($ns));
 		}
 
-		return $this->addChild($name, $value);
+		return parent::addChild($name, $value);
 	}
 
 	/**
@@ -67,6 +79,9 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		return $newChild;
 	}
 
+	/**
+	 * Add CDATA if necessary
+	 */
 	public function addChildEscape($name, $value = null)
 	{
 		if( $this->isXmlSafe($value) )
@@ -77,6 +92,14 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		{
 			return $this->addChildWithCDATA($name, $value);
 		}
+	}
+
+	/**
+	 * Overwrite default addChild implementation
+	 */
+	public function addChild($name, $value = '')
+	{
+		return $this->addChildEscape($name, $value);
 	}
 
 	/**
@@ -115,5 +138,33 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		$element = str_replace(static::getNamespaceXmlns(), '', $element);
 
 		return $element;
+	}
+
+	/**
+	 * Add a child with multiple values
+	 * @param string  $name       Name of the element
+	 * @param array   $values     Values for the element
+	 * @param boolean $alwaysShow If true, there is always an empty element created (default: false)
+	 */
+	public function addMultiChild($name, array $values = [], $alwaysShow = false)
+	{
+		if( count($values) === 1 )
+		{
+			return $this->addChildEscape($name, $values[0]);
+		}
+		else if( count($values) === 0 )
+		{
+			return $alwaysShow ? $this->addChildEscape($name) : $this->addChildIfNotEmpty($name);
+		}
+
+
+		$child = $this->addChildEscape($name);
+
+		foreach ($values as $value)
+		{
+			$child->addChild(static::$childNodeName, $value);
+		}
+
+		return $child;
 	}
 }
