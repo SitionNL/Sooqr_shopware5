@@ -182,6 +182,16 @@ class ShopwareConfig
 		            'description' => "Provide extra options for the sooqr searchbar. Add options to the '_wssq' array"
 		        ]
 		    ],
+			[ 
+				'text', 
+				static::getName('image_size'),
+		        [
+		            'label' => 'Image size',
+		            'scope' => Element::SCOPE_SHOP,
+		            'value' => $this->getDefault($settings, 'image_size', "200"),
+		            'description' => "Provide the size of the images to send to Sooqr. Can be number of pixels or (S (200), M (600) or L (1280))"
+		        ]
+		    ],
 		];
 	}
 

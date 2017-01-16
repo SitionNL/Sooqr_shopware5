@@ -3,6 +3,7 @@
 namespace Shopware\SitionSooqr\Components;
 
 use Doctrine\ORM\Tools\Pagination\Paginator;
+use Doctrine\Common\Collections\ArrayCollection;
 use Shopware\SitionSooqr\Components\SimpleXMLElementExtended as SimpleXMLElement;
 use Shopware\SitionSooqr\Components\Locking;
 use Shopware\SitionSooqr\Components\Gzip;
@@ -176,6 +177,33 @@ class SooqrXml
 		return $this->cache['config']['hideNoInstock'];
 	}
 
+	public function imageSizeConfig()
+	{
+		if( !isset($this->cache['config']) ) $this->cache['config'] = [];
+
+		if( !isset($this->cache['config']['image_size']) )
+		{
+			$imageSize = strtolower(Shopware()->Config()->get(ShopwareConfig::getName('image_size'), "200"));
+
+			$sizes = [
+				's' => 200,
+				'm' => 600,
+				'l' => 1280
+			];
+
+			if( in_array($imageSize, [ 's', 'm', 'l' ] ) )
+			{
+				$this->cache['config']['image_size'] = $sizes[$imageSize];
+			}
+			else
+			{
+				$this->cache['config']['image_size'] = intval($imageSize);
+			}
+		}
+
+		return $this->cache['config']['image_size'];
+	}
+
 	public function totalArticleDetails()
 	{
 		$sql = "SELECT count(*) AS count FROM s_articles_details" . ($this->hideNoInstockConfig() ? " WHERE instock > 0" : "");
@@ -311,20 +339,51 @@ class SooqrXml
 		return isset($row['path']) ? Helpers::pathCombine( $this->getShopBaseUrl(), $row['path'] ) : "";
 	}
 
-	public function getImageurlForArticle($article)
+	public function selectThumbnail($thumbnails)
+	{
+		if( count($thumbnails) < 1 ) return '';
+
+		// requested image size
+		$imageSize = $this->imageSizeConfig();
+
+		// calculate the difference for all thumbnail sizes
+		$sizes = [];
+		foreach ($thumbnails as $size => $url) 
+		{
+			// for now just get image with size closest to requested
+			$dimensions = explode("x", $size); // [ width, height ]
+			$sizes[$size] = abs($dimensions[0] - $imageSize) + abs($dimensions[1] - $imageSize);
+		}
+
+		// sort on closest
+		asort($sizes);
+
+		// return key of first element
+		reset($sizes);
+		$size = key($sizes);
+
+		return $thumbnails[$size];
+	}
+
+	public function getImageLinkArticle($article)
 	{
 		// engine/Shopware/Controllers/Frontend/Detail.php on line 99 (sGetArticleById)
 		// engine/Shopware/Components/Compatibility/LegacyStructConverter.php on line 375 (convertMediaStruct)
-		
+
 		$image = $article->getImages()->first();
 
 		if( $image )
 		{
 			$media = $image->getMedia();
 
+			$thumbnails = $media->getThumbnails();
+
+			$path = $this->selectThumbnail($thumbnails);
+			if( !$path ) return '';
+
 			$host = Shopware()->Config()->get("host");
 
-			$path = $media->getPath();
+			// $path = $media->getPath();
 
 			// dont follow urls, takes a looooong time
 			// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
@@ -395,16 +454,17 @@ class SooqrXml
 		return "</products></rss>";
 	}
 
-	protected function getPrice($item, $article)
+	protected function getPrice($item, $article, $detail)
 	{
-		$mainDetail = $article->getMainDetail();
-		$price = $mainDetail->getPrices()->first();
+		$price = $detail->getPrices()->first();
 
 		$pseudoPrice = $price->getPseudoPrice();
 		$price = $price->getPrice();
 
 		$tax = $article->getTax();
 		$taxPercentage = $tax->getTax();
+
+		$item->addChild("sqr:price_gross", $price);
 
 		// price is gross, calculate net
 		$price += $price * $taxPercentage / 100;
@@ -413,6 +473,8 @@ class SooqrXml
 
 		if( $pseudoPrice > 0 ) // has a discount
 		{
+			$item->addChild("sqr:normal_price_gross", $pseudoPrice);
+
 			// pseudoPrice is gross, calculate net
 			$pseudoPrice += $pseudoPrice * $taxPercentage / 100;
 
@@ -516,7 +578,7 @@ class SooqrXml
 			}
 		}
 		
-		foreach ($levels as $level => $categories) 
+		foreach ($levels as $level => $categories)
 		{
 			$item->addMultiChild("category{$level}", $categories, true);
 		}
@@ -525,13 +587,13 @@ class SooqrXml
 	/**
 	 * Get info from s_articles_attributes table
 	 */
-	public function getExtraAttributes($item, $mainDetail)
+	public function getExtraAttributes($item, $detail)
 	{
-		$attribute = $mainDetail->getAttribute();
+		$attribute = $detail->getAttribute();
 
 		if( !empty($attribute) )
 		{
-			for ($i=0; $i < 20; $i++) 
+			for ($i=0; $i < 20; $i++)
 			{
 				$method = "getAttr{$i}";
 				
@@ -548,9 +610,45 @@ class SooqrXml
 		}
 	}
 
-	public function buildItem($article)
+	/**
+	 * Add stock and stock status for an article to an item
+	 * The stock is the total of all details of the article
+	 */
+	public function getStockArticle($item, $article, $details)
+	{
+		// Boolean for when the stock is <= 0, 
+		// if the item should be available or not
+		$lastStock = (bool)$article->getLastStock();
+
+		$stock = array_reduce($details->toArray(), function($total, $detail) { 
+			return $total + intval($detail->getInStock()); 
+		}, 0);
+
+		$item->addChild('sqr:stock', $stock);
+		$item->addChild('sqr:stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
+	}
+
+	/**
+	 * Add stock and stock status for an detail to an item
+	 * The stock is the stock of only one detail
+	 */
+	public function getStockDetail($item, $article, $detail)
+	{
+		// Boolean for when the stock is <= 0, 
+		// if the item should be available or not
+		$lastStock = (bool)$article->getLastStock();
+
+		$stock = $detail->getInStock();
+		$stock = empty($stock) ? 0 : intval($stock);
+
+		$item->addChild('sqr:stock', $stock);
+		$item->addChild('sqr:stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
+	}
+
+	public function buildItems($article)
 	{
 		$mainDetail = $article->getMainDetail();
+		$details = $article->getDetails();
 		$supplier = $article->getSupplier();
 
 		$item = new SimpleXMLElement("<item></item>");
@@ -573,13 +671,14 @@ class SooqrXml
 		$item->addChildIfNotEmpty("sqr:additional_text", $mainDetail->getAdditionalText());
 		
 		$item->addChildWithCDATA("sqr:url", $this->getUrlForArticle($article));
-		$item->addChildWithCDATA("sqr:image_link", $this->getImageurlForArticle($article));
+		$item->addChildWithCDATA("sqr:image_link", $this->getImageLinkArticle($article));
 
-		$this->getPrice($item, $article);
+		$this->getPrice($item, $article, $mainDetail);
 		$this->getConfiguratorOptions($item, $article);
 		$this->getFilterValues($item, $article);
 		$this->getCategories($item, $article);
 		$this->getExtraAttributes($item, $mainDetail);
+		$this->getStockArticle($item, $article, $details);
 
 		// return xml element without the xml header
 		return $item->toElementString();
@@ -642,9 +741,9 @@ class SooqrXml
 
 			$this->iterateArticles(function($article) use ($tmp, $echo) {
 
-				$item = $this->buildItem($article);
+				$items = $this->buildItems($article);
 
-				$this->outputString($tmp, $item, $echo);
+				$this->outputString($tmp, $items, $echo);
 			});
 
 			$this->outputString($tmp, $this->getXmlFooter(), $echo);

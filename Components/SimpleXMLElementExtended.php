@@ -121,7 +121,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	 */
 	public function isXmlSafe($value)
 	{
-		return htmlspecialchars($value) === $value;
+		return strcmp( htmlspecialchars($value), $value ) === 0;
 	}
 
 	/**
