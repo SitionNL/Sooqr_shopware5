@@ -8,7 +8,7 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.1.4",
+    "currentVersion": "1.2.0",
 
     "changelog": {
         "de": {
@@ -16,7 +16,8 @@
             "1.0.1": "Hinzugefügt Preis xml, URL, um Bilder und Artikel jetzt korrekt in Verbindung mit den Teil Geschäfte und hat eine Solaranlage json",
             "1.0.3": "Jeder Teilgeschäft generiert seine eigene xml + Preis und Pseudo-Preis in xml",
             "1.1.0": "Einige Artikel- und Artikeldetailsfelder wurden hinzugefügt",
-            "1.1.1": "Zeigen Sie keine Artikel ohne Lager an, wenn hideNoInStock aktiviert ist"
+            "1.1.1": "Zeigen Sie keine Artikel ohne Lager an, wenn hideNoInStock aktiviert ist",
+            "1.2.0": "Geänderter Feed nach Sooqr-Empfehlungen"
         },
         "en": {
             "1.0.0": "First release",
@@ -24,14 +25,16 @@
             "1.0.2": "Fixed image url in xml + fixed needBuilding function",
             "1.0.3": "Every subshop generates its own xml + price and pseudoprice in xml",
             "1.1.0": "Added some article and article-detail fields",
-            "1.1.1": "Don't show articles without stock if hideNoInStock is enabled"
+            "1.1.1": "Don't show articles without stock if hideNoInStock is enabled",
+            "1.2.0": "Changed feed according to Sooqr recommendations"
         },
         "nl": {
             "1.0.0": "Eerste uitgave",
             "1.0.1": "Prijs toegevoegd aan xml, url naar plaatjes en artikels nu goed i.s.m. subshops en sooqr installation json toegevoegd",
             "1.0.3": "Elke subshop genereert zijn eigen xml + prijs en aanbiedingsprijs in het xml",
             "1.1.0": "Een aantal artikel en artikel-detail velden toegevoegd",
-            "1.1.1": "Artikelen zonder voorraad niet laten zien als hideNoInStock is ingeschakeld"
+            "1.1.1": "Artikelen zonder voorraad niet laten zien als hideNoInStock is ingeschakeld",
+            "1.2.0": "Feed gewijzigd naar de aanbevelingen van Sooqr"
         }
     },
 
