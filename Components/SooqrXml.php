@@ -447,20 +447,10 @@ class SooqrXml
 			{
 				$groupOptions = $options[$groupId];
 
-				if( count($groupOptions) === 1 )
-				{
-					$item->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($group->getName()), $groupOptions[0]);
-				}
-				else if( count($groupOptions) > 1 )
-				{
-					$groupItem = $item->addChild('sqr:' . $this->escapeXmlTag($group->getName() . "s"));
-
-					foreach( $groupOptions as $key => $groupOption )
-					{
-						$groupItem->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($group->getName()), $groupOption);
-					}
-				}
-			} else {
+				$item->addMultiChild('sqr:' . $this->escapeXmlTag($group->getName()), $groupOptions);
+			} 
+			else 
+			{
 				$item->addChild('sqr:' . $this->escapeXmlTag($group->getName()), "");
 			}
 		}
@@ -493,21 +483,7 @@ class SooqrXml
 			{
 				$optionValues = $values[$optionId];
 
-				if( count($optionValues) === 1 )
-				{
-					$item->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($option->getName()), $optionValues[0]);
-				}
-				else if( count($optionValues) > 1 )
-				{
-					$groupItem = $item->addChild('sqr:' . $this->escapeXmlTag($option->getName() . "s"));
-
-					foreach( $optionValues as $key => $groupOption ) 
-					{
-						$groupItem->addChildIfNotEmpty('sqr:' . $this->escapeXmlTag($option->getName()), $groupOption);
-					}
-				}
-			} else {
-				// $item->addChild('sqr:' . $this->escapeXmlTag($option->getName()), "");
+				$item->addMultiChild('sqr:' . $this->escapeXmlTag($option->getName()), $optionValues);
 			}
 		}
 	}
@@ -518,53 +494,31 @@ class SooqrXml
 
 		$articleCategories = $article->getCategories();
 
-		$xmlCategories = [];
-		$xmlSubCategories = [];
+		$levels = [];
 
+		// loop through all categories of the article
 		foreach( $articleCategories as $category )
 		{
 			$categories = [ $category->getName() ];
 
+			// get categories till at root, 
+			// or till a parent category from the config is reached
 			while($category = $category->getParent())
 			{
 				if( in_array($category->getId(), $categoryParents) ) break;
 				array_unshift($categories, $category->getName());
 			}
 
-			$xmlCategories = array_merge($xmlCategories, array_slice($categories, 0, 2));
-
-			if( count($categories) > 2 )
-			{
-				$xmlSubCategories = array_merge($xmlSubCategories, array_slice($categories, 2));
+			// gather the categories in the correct level
+			for ($i=0; $i < count($categories); $i++) 
+			{ 
+				$levels[$i][] = $categories[$i];
 			}
 		}
 		
-		if( count($xmlCategories) > 1 )
+		foreach ($levels as $level => $categories) 
 		{
-			$categoriesElement = $item->addChild("categories");
-
-			foreach( $xmlCategories as $key => $category ) 
-			{
-				$categoriesElement->addChildIfNotEmpty('category', $category);
-			}
-		} 
-		else 
-		{
-			$item->addChildIfNotEmpty('category', isset($xmlCategories[0]) ? $xmlCategories[0] : "");
-		}
-
-		if( count($xmlSubCategories) > 1 )
-		{
-			$subCategoriesElement = $item->addChild("subcategories");
-
-			foreach( $xmlSubCategories as $key => $subCategory ) 
-			{
-				$subCategoriesElement->addChildIfNotEmpty('subcategory', $subCategory);
-			}
-		} 
-		else 
-		{
-			$item->addChildIfNotEmpty('subcategory', isset($xmlSubCategories[0]) ? $xmlSubCategories[0] : "");
+			$item->addMultiChild("category{$level}", $categories, true);
 		}
 	}
 

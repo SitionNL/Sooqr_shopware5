@@ -36,7 +36,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		static::$childNodeName = $name;
 	}
 
-	public static function setChildNodeName()
+	public static function getChildNodeName()
 	{
 		return static::$childNodeName;
 	}
@@ -142,13 +142,14 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 
 	/**
 	 * Add a child with multiple values
-	 * @param string  $name       Name of the element
-	 * @param array   $values     Values for the element
-	 * @param boolean $alwaysShow If true, there is always an empty element created (default: false)
+	 * @param string  $name          Name of the element
+	 * @param array   $values        Values for the element
+	 * @param boolean $alwaysSubNode If true, a single element always is in a child element
+	 * @param boolean $alwaysShow    If true, there is always an empty element created (default: false)
 	 */
-	public function addMultiChild($name, array $values = [], $alwaysShow = false)
+	public function addMultiChild($name, array $values = [], $alwaysSubNode = false, $alwaysShow = false)
 	{
-		if( count($values) === 1 )
+		if( $alwaysSubNode === false && count($values) === 1 )
 		{
 			return $this->addChildEscape($name, $values[0]);
 		}
@@ -158,7 +159,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		}
 
 
-		$child = $this->addChildEscape($name);
+		$child = $this->addChildNs($name);
 
 		foreach ($values as $value)
 		{
