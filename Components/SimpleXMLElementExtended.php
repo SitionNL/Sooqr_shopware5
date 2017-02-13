@@ -135,7 +135,8 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 		$element = $dom->ownerDocument->saveXML($dom->ownerDocument->documentElement);
 
 		// remove namespaces on single elements
-		$element = str_replace(static::getNamespaceXmlns(), '', $element);
+		$element = str_replace( static::getNamespaceXmlns(), '', $element);
+		$element = str_replace(' >', '>', $element);
 
 		return $element;
 	}
