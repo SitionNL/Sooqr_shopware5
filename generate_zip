@@ -22,17 +22,14 @@ echo "remote url: $REMOTE_URL"
 # clone git repo
 git clone $REMOTE_URL .
 
-# Install composer packages
-composer install --no-dev
-# Make sure autoload map exists
-composer dump-autoload
+# # Install composer packages
+# composer install --no-dev
+# # Make sure autoload map exists
+# composer dump-autoload
 
 # remove tests of upperscore library
-echo "Removing tests from upperscore library for Shopware validation - ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*"
-rm ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*
-
-# Put braces around string concatanations in vendor/composer/autoload_static.php
-php braceComposer.php
+# echo "Removing tests from upperscore library for Shopware validation - ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*"
+# rm ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*
 
 # get version from plugin.json
 VERSION=$(php -r "echo json_decode(file_get_contents(__DIR__ . '/plugin.json'), true)['currentVersion'];")
