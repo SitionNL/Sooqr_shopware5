@@ -55,7 +55,7 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 				// "timezone" => timezone_name_get(date_timezone_get(date_create(null))),
 				// "system" => date_default_timezone_get(),
 				// "extension" => "Sition_SitionSooqr",
-				// "version" => $this->getPluginVersion()
+				// "extension_version" => $this->getPluginVersion()
 			]
 		];
 
@@ -73,7 +73,7 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 				"timezone" => timezone_name_get(date_timezone_get(date_create(null))),
 				"system" => date_default_timezone_get(),
 				"extension" => "Sition_SitionSooqr",
-				"version" => $this->getPluginVersion()
+				"extension_version" => $this->getPluginVersion()
 			];
 
 		}, $shops);
