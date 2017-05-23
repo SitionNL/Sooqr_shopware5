@@ -69,7 +69,7 @@ class SooqrXml
 		SimpleXMLElement::addNamespace('g', "http://base.google.com/ns/1.0");
 
 		// set name of child element that is created when a node has multiple values
-		SimpleXMLElement::setChildNodeName('sqr:node');
+		SimpleXMLElement::setChildNodeName('node');
 	}
 
 	public function currentShopId()
@@ -370,25 +370,37 @@ class SooqrXml
 		// engine/Shopware/Controllers/Frontend/Detail.php on line 99 (sGetArticleById)
 		// engine/Shopware/Components/Compatibility/LegacyStructConverter.php on line 375 (convertMediaStruct)
 
-		$image = $article->getImages()->first();
-
-		if( $image )
+		try
 		{
-			$media = $image->getMedia();
+			$image = $article->getImages()->first();
 
-			$thumbnails = $media->getThumbnails();
+			if( $image )
+			{
+				$media = $image->getMedia();
 
-			$path = $this->selectThumbnail($thumbnails);
-			if( !$path ) return '';
+				$thumbnails = $media->getThumbnails();
 
-			$host = Shopware()->Config()->get("host");
+				$path = $this->selectThumbnail($thumbnails);
+				if( !$path ) return '';
 
-			// $path = $media->getPath();
+				$host = Shopware()->Config()->get("host");
 
-			// dont follow urls, takes a looooong time
-			// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
+				// $path = $media->getPath();
+
+				// dont follow urls, takes a looooong time
+				// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
+
+				return "http://{$host}/{$path}";
+			}
 			
-			return "http://{$host}/{$path}";
+		}
+		catch(\Doctrine\ORM\EntityNotFoundException $ex)
+		{
+			return '';
+		}
+		catch(Exception $ex)
+		{
+			return "";
 		}
 
         return "";
@@ -439,7 +451,7 @@ class SooqrXml
 
 		foreach ($config as $key => $value)
 		{
-			$configElement->addChild("sqr:{$key}", $value);
+			$configElement->addChild("{$key}", $value);
 		}
 
 		$header .= $configElement->toElementString();
@@ -464,21 +476,21 @@ class SooqrXml
 		$tax = $article->getTax();
 		$taxPercentage = $tax->getTax();
 
-		$item->addChild("sqr:price_gross", $price);
+		$item->addChild("price_gross", $price);
 
 		// price is gross, calculate net
 		$price += $price * $taxPercentage / 100;
 
-		$item->addChild("sqr:price", round($price, 2));
+		$item->addChild("price", round($price, 2));
 
 		if( $pseudoPrice > 0 ) // has a discount
 		{
-			$item->addChild("sqr:normal_price_gross", $pseudoPrice);
+			$item->addChild("normal_price_gross", $pseudoPrice);
 
 			// pseudoPrice is gross, calculate net
 			$pseudoPrice += $pseudoPrice * $taxPercentage / 100;
 
-			$item->addChild("sqr:normal_price", round($pseudoPrice, 2));
+			$item->addChild("normal_price", round($pseudoPrice, 2));
 		}
 	}
 
@@ -509,11 +521,11 @@ class SooqrXml
 			{
 				$groupOptions = $options[$groupId];
 
-				$item->addMultiChild('sqr:' . $this->escapeXmlTag($group->getName()), $groupOptions);
+				$item->addMultiChild($this->escapeXmlTag($group->getName()), $groupOptions);
 			} 
 			else 
 			{
-				$item->addChild('sqr:' . $this->escapeXmlTag($group->getName()), "");
+				$item->addChild($this->escapeXmlTag($group->getName()), "");
 			}
 		}
 	}
@@ -545,7 +557,7 @@ class SooqrXml
 			{
 				$optionValues = $values[$optionId];
 
-				$item->addMultiChild('sqr:' . $this->escapeXmlTag($option->getName()), $optionValues);
+				$item->addMultiChild($this->escapeXmlTag($option->getName()), $optionValues);
 			}
 		}
 	}
@@ -624,8 +636,8 @@ class SooqrXml
 			return $total + intval($detail->getInStock()); 
 		}, 0);
 
-		$item->addChild('sqr:stock', $stock);
-		$item->addChild('sqr:stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
+		$item->addChild('stock', $stock);
+		$item->addChild('stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
 	}
 
 	/**
@@ -641,8 +653,8 @@ class SooqrXml
 		$stock = $detail->getInStock();
 		$stock = empty($stock) ? 0 : intval($stock);
 
-		$item->addChild('sqr:stock', $stock);
-		$item->addChild('sqr:stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
+		$item->addChild('stock', $stock);
+		$item->addChild('stock_status', $stock > 0 || $lastStock === false ? 1 : 0);
 	}
 
 	public function buildItems($article)
@@ -653,25 +665,25 @@ class SooqrXml
 
 		$item = new SimpleXMLElement("<item></item>");
 
-		$item->addChildEscape("sqr:id", $mainDetail->getNumber());
-		$item->addChildIfNotEmpty("sqr:title", $article->getName());
-		$item->addChildIfNotEmpty("sqr:description_short", $article->getDescription());
-		$item->addChildIfNotEmpty("sqr:description", $article->getDescriptionLong());
-		$item->addChildIfNotEmpty("sqr:meta_title", $article->getMetaTitle());
-		$item->addChildIfNotEmpty("sqr:keywords", $article->getKeywords());
+		$item->addChildEscape("id", $mainDetail->getNumber());
+		$item->addChildIfNotEmpty("title", $article->getName());
+		$item->addChildIfNotEmpty("description_short", $article->getDescription());
+		$item->addChildIfNotEmpty("description", $article->getDescriptionLong());
+		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
+		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
 
-		$item->addChildIfNotEmpty("sqr:brand", $supplier ? $supplier->getName() : "");
+		$item->addChildIfNotEmpty("brand", $supplier ? $supplier->getName() : "");
 
-		$item->addChildIfNotEmpty("sqr:supplier_number", $mainDetail->getSupplierNumber());
-		$item->addChildIfNotEmpty("sqr:ean", $mainDetail->getEan());
-		$item->addChildIfNotEmpty("sqr:width", $mainDetail->getWidth());
-		$item->addChildIfNotEmpty("sqr:height", $mainDetail->getHeight());
-		$item->addChildIfNotEmpty("sqr:weight", $mainDetail->getWeight());
-		$item->addChildIfNotEmpty("sqr:length", $mainDetail->getLen());
-		$item->addChildIfNotEmpty("sqr:additional_text", $mainDetail->getAdditionalText());
+		$item->addChildIfNotEmpty("supplier_number", $mainDetail->getSupplierNumber());
+		$item->addChildIfNotEmpty("ean", $mainDetail->getEan());
+		$item->addChildIfNotEmpty("width", $mainDetail->getWidth());
+		$item->addChildIfNotEmpty("height", $mainDetail->getHeight());
+		$item->addChildIfNotEmpty("weight", $mainDetail->getWeight());
+		$item->addChildIfNotEmpty("length", $mainDetail->getLen());
+		$item->addChildIfNotEmpty("additional_text", $mainDetail->getAdditionalText());
 		
-		$item->addChildWithCDATA("sqr:url", $this->getUrlForArticle($article));
-		$item->addChildWithCDATA("sqr:image_link", $this->getImageLinkArticle($article));
+		$item->addChildWithCDATA("url", $this->getUrlForArticle($article));
+		$item->addChildWithCDATA("image_link", $this->getImageLinkArticle($article));
 
 		$this->getPrice($item, $article, $mainDetail);
 		$this->getConfiguratorOptions($item, $article);
