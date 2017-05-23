@@ -66,7 +66,7 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 
 			return [
 				"name" => $shop->getName(),
-				"feed_url" => "http://" . Helpers::pathCombine( $host, $shop->getBaseUrl(), 'frontend', 'sition_sooqr', 'xml' ),
+				"feed_url" => "http://" . Helpers::pathCombine( $host, $shop->getBaseUrl(), 'frontend', 'sition_sooqr', 'xml' ) . "?shop={$shop->getId()}",
 				"currency" => $currency ? $currency->getCurrency() : "",
 				"locale" => $locale ? $locale->getLocale() : "",
 				"country" => "NL",
