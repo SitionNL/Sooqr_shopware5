@@ -97,7 +97,7 @@ Class SimpleXMLElementExtended extends SimpleXMLElement {
 	/**
 	 * Overwrite default addChild implementation
 	 */
-	public function addChild($name, $value = '')
+	public function addChild($name, $value = '', $ns = '')
 	{
 		return $this->addChildEscape($name, $value);
 	}
