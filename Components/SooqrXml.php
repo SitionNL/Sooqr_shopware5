@@ -252,8 +252,6 @@ class SooqrXml
 		// get the category of the shop
 		$mainCategoryId = $this->shop->getCategory()->getId();
 
-		echo 'mainCategoryId: ' . $mainCategoryId . "<br />\n";
-
 		// get all categories
 		$sql = "SELECT id, parent FROM s_categories";
 		$categories = $this->db->executeQuery($sql)->fetchAll();
