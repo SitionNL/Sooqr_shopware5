@@ -10,6 +10,8 @@ use Shopware\SitionSooqr\Components\Gzip;
 use Shopware\SitionSooqr\Components\ShopwareConfig;
 use Shopware\SitionSooqr\Components\Helpers;
 use Shopware\SitionSooqr\Components\PluginJson;
+use Shopware\SitionSooqr\CategoryTree\CategoryTree;
+use Shopware\SitionSooqr\CategoryTree\CategoryTreeEntry;
 
 class SooqrXml
 {
@@ -51,7 +53,7 @@ class SooqrXml
 		'config' => []
 	];
 
-	public function __construct()
+	public function __construct($shopId = null)
 	{
 		set_time_limit(60 * 60); // 1 hour
 
@@ -59,7 +61,7 @@ class SooqrXml
 
 		$this->lock = new Locking( $this->getLockFile() );
 
-		$this->shop = Shopware()->Shop();
+		$this->setShop($shopId);
 		$this->config = Shopware()->Config();
 		$this->db = Shopware()->Db();
 		$this->pluginJson = new PluginJson;
@@ -70,6 +72,22 @@ class SooqrXml
 
 		// set name of child element that is created when a node has multiple values
 		SimpleXMLElement::setChildNodeName('node');
+	}
+
+	protected function setShop($shopId = null) {
+		if( !empty($shopId) ) {
+
+			$repo = $this->getShopRepository();
+
+			$shop = $repo->find($shopId);
+
+			if( !empty($shop) ) {
+				$this->shop = $shop;
+				return;
+			}
+		}
+
+		$this->shop = Shopware()->Shop();
 	}
 
 	public function currentShopId()
@@ -165,6 +183,11 @@ class SooqrXml
 		return $this->em->getRepository('Shopware\Models\Article\Article');
 	}
 
+	public function getShopRepository()
+	{
+		return $this->em->getRepository('Shopware\Models\Shop\Shop');
+	}
+
 	public function hideNoInstockConfig()
 	{
 		if( !isset($this->cache['config']) ) $this->cache['config'] = [];
@@ -225,58 +248,91 @@ class SooqrXml
 		return empty($result['count']) ? 0 : $result['count'];
 	}
 
+	public function getShopCategoryIds() {
+		// get the category of the shop
+		$mainCategoryId = $this->shop->getCategory()->getId();
+
+		echo 'mainCategoryId: ' . $mainCategoryId . "<br />\n";
+
+		// get all categories
+		$sql = "SELECT id, parent FROM s_categories";
+		$categories = $this->db->executeQuery($sql)->fetchAll();
+
+		// build category tree, and select the main category
+		$tree = new CategoryTree($categories);
+		$treeEntry = $tree->getById($mainCategoryId);
+
+		// select all children of the mainCategory
+		$children = $treeEntry->getDeepChildren();
+
+		// get ids of the children
+		$categoryIds = array_map(function($child) { return $child->getId(); }, $children);
+
+		// add main if needed
+		if( !in_array($mainCategoryId, $categoryIds) ) $categoryIds[] = $mainCategoryId;
+
+		return $categoryIds;
+	}
+
+	/**
+	 * TODO: create iterate of articles with only articles of subshop
+	 */
 	public function iterateArticles(callable $cb)
 	{
-		// http://docs.doctrine-project.org/projects/doctrine-orm/en/latest/reference/batch-processing.html
+		$limit = 20;
+		$offset = 0;
+		$ids = [];
 
-		$batchSize = 20;
-		$i = 0;
+		$categoryIdsIn = implode(",", $this->getShopCategoryIds());
+		$articleRepo = $this->getArticleRepository();
 
-		$dql = "SELECT a FROM Shopware\Models\Article\Article a " .
-			"WHERE a.active = 1 ";
-
-		// if articles without stock should be hidden,
-		// get all article ids of articles that have no stock
-		// then check the articles are not in the articleIds
-		if( $this->hideNoInstockConfig() )
+		do
 		{
-			$articleIds = array_map(
-				function($row) { return $row['articleID']; },
-				$this->db->executeQuery(
-					// get the id for articles where no detail has any stock
-					"SELECT articleID FROM s_articles_details " .
-					"GROUP BY articleID " .
-					"HAVING SUM(instock) < 1"
-				)->fetchAll()
+			$sql = (
+				"SELECT id FROM s_articles a " .
+
+				// select only articles with stock (depending on config)
+				($this->hideNoInstockConfig() ? 
+					"JOIN ( " .
+						"SELECT articleID FROM s_articles_details " .
+						"GROUP BY articleID " .
+						"HAVING SUM(instock) > 0 " .
+					") b ON b.articleID = a.id "
+					:
+					""
+				) .
+
+				// select only articles that have a category in the tree of the shop category
+				"JOIN ( " .
+					"SELECT DISTINCT(articleID) FROM ( " .
+						"SELECT ac.articleID FROM s_articles_categories ac WHERE ac.categoryID IN ({$categoryIdsIn}) " .
+						"UNION " .
+						"SELECT acr.articleID FROM s_articles_categories_ro acr WHERE acr.categoryID IN ({$categoryIdsIn}) " .
+					") un " .
+				") ca ON ca.articleID = a.id " .
+
+				"WHERE a.active = 1 " .
+				"LIMIT {$limit} OFFSET {$offset} "
 			);
 
-			// build IN query
-			$articleIds = implode(",", $articleIds);
-			$dql .= "AND a.id NOT IN ({$articleIds})";
+			// pluck ids of the returned rows
+			$ids = array_map(function($row) { return $row['id']; }, $this->db->executeQuery($sql)->fetchAll());
 
-			$articleIds = null;
+			// select the doctrine article-models for the ids
+			$articles = $articleRepo->findById($ids);
+
+			foreach ($articles as $article)
+			{
+				call_user_func($cb, $article);
+			}
+
+			// flush changes
+			$this->em->flush();
+
+			// set offset for next batch
+			$offset += $limit;
 		}
-
-		$q = $this->em->createQuery($dql);
-
-		foreach( $q->iterate() as $row ) 
-		{
-		    $article = $row[0];
-		    // $user->increaseCredit();
-		    // $user->calculateNewBonuses();
-		   	// echo $article->getName() . "<br />";
-		    call_user_func($cb, $article);
-
-		    if( ($i % $batchSize) === 0 ) 
-		    {
-		        $this->em->flush(); // Executes all updates.
-		        $this->em->clear(); // Detaches all objects from Doctrine!
-		    }
-
-		    ++$i;
-		}
-
-		$this->em->flush();
+		while(count($ids) > 0);
 	}
 
 	function echoFileChunked($filename, $returnBytes = false, $chunkSize = 1048576) {
@@ -666,7 +722,7 @@ class SooqrXml
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChildEscape("id", $mainDetail->getNumber());
-		$item->addChildIfNotEmpty("title", strip_tags($article->getName());
+		$item->addChildIfNotEmpty("title", strip_tags($article->getName()));
 		$item->addChildIfNotEmpty("description_short", strip_tags($article->getDescription()));
 		$item->addChildIfNotEmpty("description", strip_tags($article->getDescriptionLong()));
 		$item->addChildIfNotEmpty("meta_title", strip_tags($article->getMetaTitle()));
