@@ -14,7 +14,9 @@ class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Actio
 		$force = $request->get('force');
 		$force = empty($force) ? false : true;
 
-		$sooqr = new SooqrXml;
+		$shopId = intval($request->get('shop'));
+
+		$sooqr = new SooqrXml($shopId);
 
 		$sooqr->outputXml($force);
 

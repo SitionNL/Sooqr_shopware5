@@ -27,14 +27,34 @@ class Frontend implements SubscriberInterface
 
     public function onRunSitionSooqrBuildXml(\Shopware_Components_Cron_CronJob $job)
     {
-        $sooqr = new SooqrXml;
+        $db = Shopware()->Db();
+        $shopIds = array_map(function($row) { return $row; }, $db->executeQuery('SELECT id FROM s_core_shops')->fetchAll());
 
-        $maxSeconds = 2 * 60 * 60; // 2 hours
-
-        if( $sooqr->needBuilding($maxSeconds) )
+        while(count($shopIds) > 0)
         {
-            $echoOutput = false;
-            $sooqr->buildXml($echoOutput);
+            set_time_limit(60 * 60); // 1 hour
+
+            // get a random shop
+            $key = array_rand($shopIds);
+            $shopId = $shopsIds[$key];
+
+            // remove key from array
+            unset($shopIds[$key]);
+            array_values($shopIds);
+
+
+            $sooqr = new SooqrXml($shopId);
+
+            $maxSeconds = 3 * 60 * 60; // xml can be 3 hours old max
+
+            if( $sooqr->needBuilding($maxSeconds) )
+            {
+                $echoOutput = false;
+                $sooqr->buildXml($echoOutput);
+
+                // just generate for 1 shop the xml and return
+                return;
+            }
         }
     }
 }

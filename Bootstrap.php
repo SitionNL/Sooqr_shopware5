@@ -2,6 +2,8 @@
 
 use Shopware\SitionSooqr\Components\ShopwareConfig;
 use Shopware\SitionSooqr\Components\Log;
+use Doctrine\Common\Collections\ArrayCollection;
+
 /**
  * The Bootstrap class is the main entry point of any shopware plugin.
  *
@@ -64,6 +66,8 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
             "Enlight_Controller_Action_PostDispatchSecure_Frontend",
             "onSecurePostDispatch"
         );
+
+        $this->addConsoleCommand();
 
         return true;
     }
@@ -154,5 +158,23 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
         );
 
         // handling of cronjobs in Subscriber/EventsHandler.php
+    }
+
+    /**
+     * Add console commands
+     */
+    public function addConsoleCommand()
+    {
+        $this->subscribeEvent(
+            'Shopware_Console_Add_Command',
+            'onAddConsoleCommand'
+        );
+    }
+
+    public function onAddConsoleCommand($args)
+    {
+        return new ArrayCollection([
+            new \Shopware\SitionSooqr\Commands\GenerateXmlCommand(),
+        ]);
     }
 }
