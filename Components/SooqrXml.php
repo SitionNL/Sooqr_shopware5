@@ -277,7 +277,7 @@ class SooqrXml
 	 */
 	public function iterateArticles(callable $cb)
 	{
-		$limit = 20;
+		$limit = 100;
 		$offset = 0;
 		$ids = [];
 

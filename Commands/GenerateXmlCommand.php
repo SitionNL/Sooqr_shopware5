@@ -38,14 +38,14 @@ EOF
         $shopIds = explode(',', trim($input->getArgument('shops')));
         $force = !!$input->getArgument('force');
 
-        $output->writeln("<info>Start building xml for shop...</info>");
-
         try
         {
             foreach ($shopIds as $key => $shopId)
             {
-                echo 'shopId: ' . $shopId;
                 $sooqr = new SooqrXml($shopId);
+
+                $startTime = microtime(true);
+                $output->writeln("<info>Start building xml for shop {$shopId}</info>");
 
                 if( $force )
                 {
@@ -62,6 +62,11 @@ EOF
                         $sooqr->buildXml($echoOutput);
                     }
                 }
+
+                $endTime = microtime(true);
+                $time = $endTime - $startTime;
+
+                $output->writeln("<info>Done building xml for shop {$shopId} in {$time} seconds.</info>");
             }
         }
         catch(Exception $ex)
@@ -69,6 +74,5 @@ EOF
             $output->writeln("<info>Error: {$ex->getMessage()}</info>");
         }
 
-        $output->writeln("<info>Done building xml for shop...</info>");
     }
 }
