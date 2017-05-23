@@ -668,7 +668,7 @@ class SooqrXml
 		$item->addChildEscape("id", $mainDetail->getNumber());
 		$item->addChildIfNotEmpty("title", $article->getName());
 		$item->addChildIfNotEmpty("description_short", $article->getDescription());
-		$item->addChildIfNotEmpty("description", $article->getDescriptionLong());
+		$item->addChildIfNotEmpty("description", strip_tags($article->getDescriptionLong()));
 		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
 		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
 
