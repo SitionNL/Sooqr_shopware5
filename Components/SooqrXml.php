@@ -666,10 +666,10 @@ class SooqrXml
 		$item = new SimpleXMLElement("<item></item>");
 
 		$item->addChildEscape("id", $mainDetail->getNumber());
-		$item->addChildIfNotEmpty("title", $article->getName());
-		$item->addChildIfNotEmpty("description_short", $article->getDescription());
+		$item->addChildIfNotEmpty("title", strip_tags($article->getName());
+		$item->addChildIfNotEmpty("description_short", strip_tags($article->getDescription()));
 		$item->addChildIfNotEmpty("description", strip_tags($article->getDescriptionLong()));
-		$item->addChildIfNotEmpty("meta_title", $article->getMetaTitle());
+		$item->addChildIfNotEmpty("meta_title", strip_tags($article->getMetaTitle()));
 		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
 
 		$item->addChildIfNotEmpty("brand", $supplier ? $supplier->getName() : "");
