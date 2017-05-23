@@ -13,7 +13,7 @@ class Helpers
 	 * @param  string/array  Variable number of arguments. Arguments must be a path string or an array of path strings
 	 * @return string        combined path  
 	 */
-	public function pathCombine()
+	public static function pathCombine()
 	{
 		$paths = array_values( Helpers::arrayFlatten(func_get_args()) );
 		$newPaths = array();
@@ -41,7 +41,7 @@ class Helpers
 		return implode("/", $newPaths);
 	}
 
-	public function arrayFlatten(array $arr) 
+	public static function arrayFlatten(array $arr) 
 	{
 	    $arr = array_reduce($arr, function($a, $item) {
 
@@ -53,7 +53,7 @@ class Helpers
 	    return $arr;
 	}
 
-	public function randomString($length = 10)
+	public static function randomString($length = 10)
 	{
 		$chars = str_split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 
