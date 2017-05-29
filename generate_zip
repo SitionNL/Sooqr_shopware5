@@ -31,6 +31,17 @@ git clone $REMOTE_URL .
 # echo "Removing tests from upperscore library for Shopware validation - ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*"
 # rm ~/plugins/$PLUGINDIR/vendor/pisc/upperscore/src/tests/*
 
+# remove unnecessary files
+rm TODO.md
+rm ROADMAP.md
+
+rm -rf tests
+rm phpunit.xml.dist
+
+rm braceComposer.php
+rm generate_zip
+
+
 # get version from plugin.json
 VERSION=$(php -r "echo json_decode(file_get_contents(__DIR__ . '/plugin.json'), true)['currentVersion'];")
 
