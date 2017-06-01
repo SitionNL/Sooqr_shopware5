@@ -8,7 +8,7 @@
     "link": "http://store.shopware.com",
     "author": "Shopware AG",
 
-    "currentVersion": "1.3.0",
+    "currentVersion": "1.3.1",
 
     "changelog": {
         "de": {
@@ -18,7 +18,8 @@
             "1.1.0": "Einige Artikel- und Artikeldetailsfelder wurden hinzugefügt",
             "1.1.1": "Zeigen Sie keine Artikel ohne Lager an, wenn hideNoInStock aktiviert ist",
             "1.2.0": "Geänderter Feed nach Sooqr-Empfehlungen",
-            "1.3.0": "In einem Feed sind nur die Artikel der Subshop"
+            "1.3.0": "In einem Feed sind nur die Artikel der Subshop",
+            "1.3.1": "Fügt eine Anmelde-Schaltfläche zur Konfigurations-Seite hinzu"
         },
         "en": {
             "1.0.0": "First release",
@@ -28,7 +29,8 @@
             "1.1.0": "Added some article and article-detail fields",
             "1.1.1": "Don't show articles without stock if hideNoInStock is enabled",
             "1.2.0": "Changed feed according to Sooqr recommendations",
-            "1.3.0": "Feeds only provide the articles of the subshop"
+            "1.3.0": "Feeds only provide the articles of the subshop",
+            "1.3.1": "Adds a signup button to config page"
         },
         "nl": {
             "1.0.0": "Eerste uitgave",
@@ -37,7 +39,8 @@
             "1.1.0": "Een aantal artikel en artikel-detail velden toegevoegd",
             "1.1.1": "Artikelen zonder voorraad niet laten zien als hideNoInStock is ingeschakeld",
             "1.2.0": "Feed gewijzigd naar de aanbevelingen van Sooqr",
-            "1.3.0": "In een feed zitten alleen de artikelen van de subshop"
+            "1.3.0": "In een feed zitten alleen de artikelen van de subshop",
+            "1.3.1": "Voegt een aanmeldknop toe aan de configuratiepagina"
         }
     },
 
