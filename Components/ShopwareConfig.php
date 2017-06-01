@@ -130,6 +130,14 @@ class ShopwareConfig
 	public function getElements($settings = null)
 	{
 		return [
+			[
+	            'button',
+	            static::getName('integrate'),
+	            [
+	              'label' => 'Signup for you FREE 30-days trial',
+	              'handler' => "function handler() { window.open('https://signup.sooqr.com/?base=' + encodeURIComponent(document.location.origin), '_blank'); }"
+	            ]
+			],
 			[ 
 				'interval', 
 				static::getName('time_interval'),
