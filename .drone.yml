@@ -26,3 +26,8 @@ pipeline:
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
       - ls -lah tmp/sooqr-1.xml
+
+  zip:
+    image: dnhsoft/shopware:5.2.22-php7
+    commands:
+      - echo hello
