@@ -4,7 +4,7 @@ workspace:
 
 pipeline:
   test:
-    image: dnhsoft/shopware:5.2.22-php7
+    image: dnhsoft/shopware:${IMAGE_VERSION}
     commands:
       - /swtools/init.sh
       - ls -la /shopware/engine/Shopware/Plugins/Local
@@ -19,3 +19,9 @@ services:
   db:
     image: dnhsoft/mysql-utf8:5.7
 
+matrix:
+  IMAGE_VERSION:
+    - 5.2.22-php7
+    - 5.2.22
+    - 5.2.3-php7
+    - 5.2.3
