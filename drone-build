@@ -7,7 +7,7 @@ VERSION=$(php -r "echo json_decode(file_get_contents('/shopware/engine/Shopware/
 
 cd /shopware/engine/Shopware/Plugins/Local
 
-zip -r "$PLUGINNAME-$VERSION.zip" /shopware/engine/Shopware/Plugins/Local
+zip -r "$PLUGINNAME-$VERSION.zip" .
 
 # do something with zip file
 echo "/shopware/engine/Shopware/Plugins/Local/$PLUGINNAME-$VERSION.zip"
