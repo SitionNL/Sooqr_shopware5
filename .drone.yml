@@ -7,6 +7,10 @@ pipeline:
     image: dnhsoft/shopware:5.2.22-php7
     commands:
       - /swtools/init.sh
+      - ls -la /shopware/engine/Shopware/Plugins/Local
+      - ls -la /shopware/engine/Shopware/Plugins/Local/Backend
+      - ls -la /shopware/engine/Shopware/Plugins/Local/Backend/SitionSooqr
+      - php /shopware/bin/console sw:plugin:refresh
       - php /shopware/bin/console sw:plugin:install SitionSooqr
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
