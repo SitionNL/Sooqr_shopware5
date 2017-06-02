@@ -17,13 +17,13 @@ pipeline:
   test:
     image: dnhsoft/shopware:${IMAGE_VERSION}
     commands:
+      # prepare shopware
       - /swtools/init.sh
-      - ls -la /shopware/engine/Shopware/Plugins/Local
-      - ls -la /shopware/engine/Shopware/Plugins/Local/Backend
-      - ls -la /shopware/engine/Shopware/Plugins/Local/Backend/SitionSooqr
+      # prepare SitionSooqr plugin
       - php /shopware/bin/console sw:plugin:refresh
       - php /shopware/bin/console sw:plugin:install SitionSooqr
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
+      # generate an xml and check if it exists
       - php /shopware/bin/console sition:sooqr:xml 1 1
       - ls -lah tmp/sooqr-1.xml
   
