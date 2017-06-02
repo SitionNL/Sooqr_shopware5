@@ -14,3 +14,9 @@ rm generate_zip
 
 rm prepare_production
 rm drone-build
+
+rm -rf .git
+
+# remove all test files
+rm tmp/sooqr-*.xml
+rm tmp/sooqr.lock

@@ -49,4 +49,4 @@ pipeline:
     host: swretailtest.sition-klanten.nl
     secrets: [ 'scp_username', 'scp_password' ]
     target: /home/swretailtest/plugins
-    source: /shopware/engine/Shopware/Plugins/Local/*.zip
+    source: ./*.zip
