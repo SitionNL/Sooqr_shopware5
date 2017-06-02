@@ -13,3 +13,4 @@ pipeline:
 services:
   database:
     image: dnhsoft/mysql-utf8:5.7
+
