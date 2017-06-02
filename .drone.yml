@@ -1,0 +1,15 @@
+workspace:
+  base: /shopware
+  path: engine/Shopware/Plugins/Local/Backend/SitionSooqr
+
+pipeline:
+  test:
+    image: dnhsoft:shopware:5.2.22-php7
+    commands:
+      - php ../../../../../../bin/console sw:plugin:install SitionSooqr
+      - php ../../../../../../bin/console sw:plugin:activate SitionSooqr
+      - php ../../../../../../bin/console sition:sooqr:xml 1 1
+
+services:
+  database:
+    image: dnhsoft/mysql-utf8:5.7

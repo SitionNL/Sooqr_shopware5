@@ -37,6 +37,7 @@ rm ROADMAP.md
 
 rm -rf tests
 rm phpunit.xml.dist
+rm .drone.yml
 
 rm braceComposer.php
 rm generate_zip
