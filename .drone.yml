@@ -7,6 +7,8 @@ pipeline:
     image: dnhsoft/shopware:5.2.22-php7
     commands:
       - pwd
+      - ls -la /shopware
+      - ls -la /shopware/bin
       - php /shopware/bin/console sw:plugin:install SitionSooqr
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
