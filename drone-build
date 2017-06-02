@@ -9,5 +9,7 @@ cd /shopware/engine/Shopware/Plugins/Local
 
 zip -r "$PLUGINNAME-$VERSION.zip" .
 
+mv "/shopware/engine/Shopware/Plugins/Local/$PLUGINNAME-$VERSION.zip" "/shopware/engine/Shopware/Plugins/Local/Backend/$PLUGINNAME/$PLUGINNAME-$VERSION.zip"
+
 # do something with zip file
-echo "/shopware/engine/Shopware/Plugins/Local/$PLUGINNAME-$VERSION.zip"
+echo "/shopware/engine/Shopware/Plugins/Local/Backend/$PLUGINNAME/$PLUGINNAME-$VERSION.zip"
