@@ -6,7 +6,7 @@ pipeline:
   test:
     image: dnhsoft/shopware:5.2.22-php7
     environment:
-      - SWDB_HOST: localhost
+      - SWDB_HOST=localhost
     commands:
       - pwd
       - ls -la /shopware
