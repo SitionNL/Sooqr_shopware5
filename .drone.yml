@@ -1,6 +1,6 @@
 workspace:
-  base: /shopware
-  path: engine/Shopware/Plugins/Local/Backend/SitionSooqr
+  base: /shopware/engine/Shopware/Plugins/Local
+  path: Backend/SitionSooqr
 
 pipeline:
   test:
