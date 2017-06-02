@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+PLUGINNAME=SitionSooqr
+VERSION=$(php -r "echo json_decode(file_get_contents('/shopware/engine/Shopware/Plugins/Local/Backend/$PLUGINNAME/plugin.json'), true)['currentVersion'];")
+
+./prepare_production
+
+cd /shopware/engine/Shopware/Plugins/Local
+
+zip -r "$PLUGINNAME-$VERSION.zip" /shopware/engine/Shopware/Plugins/Local
+
+# do something with zip file
+echo "/shopware/engine/Shopware/Plugins/Local/$PLUGINNAME-$VERSION.zip"

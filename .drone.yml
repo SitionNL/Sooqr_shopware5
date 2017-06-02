@@ -32,4 +32,8 @@ pipeline:
   zip:
     image: dnhsoft/shopware:5.2.22-php7
     commands:
-      - php drone-build.php
+      - ./drone-build
+      - ls -lah /shopware/engine/Shopware/Plugins/Local
+    when:
+      matrix:
+        IMAGE_VERSION: 5.2.3

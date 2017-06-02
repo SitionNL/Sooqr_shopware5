@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+cd "$( dirname "${BASH_SOURCE[0]}" )"
+
+rm TODO.md
+rm ROADMAP.md
+
+rm -rf tests
+rm phpunit.xml.dist
+rm .drone.yml
+
+rm braceComposer.php
+rm generate_zip
+
+rm prepare_production
+rm drone-build
