@@ -6,7 +6,9 @@ pipeline:
   test:
     image: dnhsoft/shopware:5.2.22-php7
     environment:
+      - SWDB_USER=root
       - SWDB_HOST=localhost
+      - SWDB_PORT=3306
     commands:
       - pwd
       - ls -la /shopware
@@ -16,6 +18,6 @@ pipeline:
       - php /shopware/bin/console sition:sooqr:xml 1 1
 
 services:
-  database:
+  db:
     image: dnhsoft/mysql-utf8:5.7
 
