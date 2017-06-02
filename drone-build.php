@@ -1,17 +1,17 @@
 <?php
 
 if( !getenv('DRONE') ) {
-	echo 'Command is not executed by drone!'
+	echo 'Command is not executed by drone!';
 	exit(1);
 }
 
 if( !file_exists(__DIR__ . '/.drone.yml') ) {
-	echo ".drone.yml doesn't exist"
+	echo ".drone.yml doesn't exist";
 	exit(1);
 }
 
 if( !file_exists(__DIR__ . '/../../IMAGE_VERSION') ) {
-	echo "IMAGE_VERSION file doesn't exist"
+	echo "IMAGE_VERSION file doesn't exist";
 	exit(1);
 }
 
@@ -32,9 +32,9 @@ $tags = array_filter($tags, function($tag) { return $tag !== '-'; });
 // get the builds that ran
 $versions = preg_split('/\s+/', file_get_contents(__DIR__ . '/../../IMAGE_VERSION'));
 
-echo "tags\n"
+echo "tags\n";
 print_r($tags);
 
 
-echo "versions\n"
+echo "versions\n";
 print_r($versions);
