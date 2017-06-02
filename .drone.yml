@@ -26,7 +26,7 @@ pipeline:
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
       - ls -lah tmp/sooqr-1.xml
-      - php -r "file_put_contents(__DIR__ . '/../../IMAGE_VERSION', ${IMAGE_VERSION}, FILE_APPEND);"
+      - php -r "file_put_contents(__DIR__ . '/../../IMAGE_VERSION', '${IMAGE_VERSION}', FILE_APPEND);"
       - cat /shopware/engine/Shopware/Plugins/Local/IMAGE_VERSION
   
   zip:
