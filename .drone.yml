@@ -36,7 +36,7 @@ pipeline:
         IMAGE_VERSION: 5.2.3
     commands:
       - ./drone-build
-      - ls -lah /shopware/engine/Shopware/Plugins/Local
+      - ls -lah .
 
   scp:
     image: appleboy/drone-scp
