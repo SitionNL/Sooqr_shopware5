@@ -5,10 +5,6 @@ workspace:
 pipeline:
   test:
     image: dnhsoft/shopware:5.2.22-php7
-    environment:
-      - SWDB_USER=root
-      - SWDB_HOST=localhost
-      - SWDB_PORT=3306
     commands:
       - /swtools/init.sh
       - php /shopware/bin/console sw:plugin:install SitionSooqr
