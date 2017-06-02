@@ -2,6 +2,17 @@ workspace:
   base: /shopware/engine/Shopware/Plugins/Local
   path: Backend/SitionSooqr
 
+matrix:
+  IMAGE_VERSION:
+    - 5.2.22-php7
+    - 5.2.22
+    - 5.2.3-php7
+    - 5.2.3
+
+services:
+  db:
+    image: dnhsoft/mysql-utf8:5.7
+
 pipeline:
   test:
     image: dnhsoft/shopware:${IMAGE_VERSION}
@@ -14,14 +25,4 @@ pipeline:
       - php /shopware/bin/console sw:plugin:install SitionSooqr
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
-
-services:
-  db:
-    image: dnhsoft/mysql-utf8:5.7
-
-matrix:
-  IMAGE_VERSION:
-    - 5.2.22-php7
-    - 5.2.22
-    - 5.2.3-php7
-    - 5.2.3
+      - ls -lah tmp/sooqr-1.xml
