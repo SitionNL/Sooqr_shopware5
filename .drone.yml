@@ -10,9 +10,7 @@ pipeline:
       - SWDB_HOST=localhost
       - SWDB_PORT=3306
     commands:
-      - pwd
-      - ls -la /shopware
-      - ls -la /shopware/bin
+      - /swtools/init.sh
       - php /shopware/bin/console sw:plugin:install SitionSooqr
       - php /shopware/bin/console sw:plugin:activate SitionSooqr
       - php /shopware/bin/console sition:sooqr:xml 1 1
