@@ -29,9 +29,24 @@ pipeline:
   
   zip:
     image: dnhsoft/shopware:5.2.22-php7
+    when:
+      status: success
+      # event: tag
+      matrix:
+        IMAGE_VERSION: 5.2.3
     commands:
       - ./drone-build
       - ls -lah /shopware/engine/Shopware/Plugins/Local
+
+  scp:
+    image: appleboy/drone-scp
+    pull: true
     when:
+      status: success
+      # event: tag
       matrix:
         IMAGE_VERSION: 5.2.3
+    host: swretailtest.sition-klanten.nl
+    secrets: [ 'scp_username', 'scp_password' ]
+    target: /home/swretailtest/plugins
+    source: /shopware/engine/Shopware/Plugins/Local/*.zip
