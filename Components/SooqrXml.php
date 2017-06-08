@@ -548,6 +548,10 @@ class SooqrXml
 		}
 	}
 
+	/**
+	 * Configurator options creates the different variants
+	 * Set -> Group -> Option
+	 */
 	protected function getConfiguratorOptions($item, $article)
 	{
 		$set = $article->getConfiguratorSet();
@@ -567,6 +571,8 @@ class SooqrXml
 
 		}, []);
 
+		$groupPrefix = 'variant_';
+
 		foreach( $groups as $group )
 		{
 			$groupId = $group->getId();
@@ -575,15 +581,19 @@ class SooqrXml
 			{
 				$groupOptions = $options[$groupId];
 
-				$item->addMultiChild($this->escapeXmlTag($group->getName()), $groupOptions);
+				$item->addMultiChild($this->escapeXmlTag($groupPrefix . $group->getName()), $groupOptions);
 			} 
 			else 
 			{
-				$item->addChild($this->escapeXmlTag($group->getName()), "");
+				$item->addChild($this->escapeXmlTag($groupPrefix . $group->getName()), "");
 			}
 		}
 	}
 
+	/**
+	 * Filter values are the extra attributes for an article
+	 * Group -> Option -> Value
+	 */
 	protected function getFilterValues($item, $article)
 	{
 		$propertyGroup = $article->getPropertyGroup();
