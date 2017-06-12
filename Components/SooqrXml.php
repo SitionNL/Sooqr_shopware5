@@ -439,6 +439,11 @@ class SooqrXml
 
 				$host = Shopware()->Config()->get("host");
 
+				if( !$host ) {
+					$mainShop = $this->shop->getMain();
+					$host = $mainShop->getHost();
+				}
+
 				// $path = $media->getPath();
 
 				// dont follow urls, takes a looooong time
