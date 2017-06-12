@@ -364,9 +364,21 @@ class SooqrXml
 	    return $status;
 	}
 
+	public function getShopHost()
+	{
+		$host = Shopware()->Config()->get("host");
+
+		if( !$host ) {
+			$mainShop = $this->shop->getMain();
+			$host = $mainShop->getHost();
+		}
+
+		return $host;
+	}
+
 	public function getShopBaseUrl()
 	{
-		$host = $this->config->get("host");
+		$host = $this->getShopHost();
 		$baseUrl = $this->shop->getBaseUrl();
 
 		$path = Helpers::pathCombine($host, $baseUrl);
@@ -437,12 +449,7 @@ class SooqrXml
 				$path = $this->selectThumbnail($thumbnails);
 				if( !$path ) return '';
 
-				$host = Shopware()->Config()->get("host");
-
-				if( !$host ) {
-					$mainShop = $this->shop->getMain();
-					$host = $mainShop->getHost();
-				}
+				$host = $this->getShopHost();
 
 				// $path = $media->getPath();
 
