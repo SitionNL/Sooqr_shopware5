@@ -369,7 +369,7 @@ class SooqrXml
 		$host = Shopware()->Config()->get("host");
 
 		if( !$host ) {
-			$mainShop = $this->shop->getMain();
+			$mainShop = $this->shop->getMain() ?: $this->shop;
 			$host = $mainShop->getHost();
 		}
 
