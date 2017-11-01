@@ -1,12 +1,13 @@
 {
     "label": {
         "de": "SitionSooqr",
-        "en": "SitionSooqr"
+        "en": "SitionSooqr",
+        "nl": "SitionSooqr"
     },
-    "copyright": "(c) by Shopware AG",
+    "copyright": "(c) by Sition Internet Services",
     "license": "proprietary",
-    "link": "http://store.shopware.com",
-    "author": "Shopware AG",
+    "link": "https://www.sition.nl",
+    "author": "Sition Internet Services",
 
     "currentVersion": "1.3.6",
 
