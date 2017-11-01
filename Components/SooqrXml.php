@@ -50,7 +50,11 @@ class SooqrXml
 	 * @var array
 	 */
 	protected $cache = [
-		'config' => []
+		'config' => [],
+		'category' => [
+			'main' => null,      // id of the main category of the shop
+			'categories' => null // ids of all categories of the shop in the category tree (ids are also key, to speed up check)
+		]
 	];
 
 	public function __construct($shopId = null)
@@ -248,28 +252,51 @@ class SooqrXml
 		return empty($result['count']) ? 0 : $result['count'];
 	}
 
-	public function getShopCategoryIds() {
-		// get the category of the shop
-		$mainCategoryId = $this->shop->getCategory()->getId();
+	public function getShopMainCategoryId()
+	{
+		if( empty($this->cache['category']['main']) )
+		{
+			// get the category of the shop
+			$this->cache['category']['main'] = $this->shop->getCategory()->getId();
+		}
 
-		// get all categories
-		$sql = "SELECT id, parent FROM s_categories";
-		$categories = $this->db->executeQuery($sql)->fetchAll();
+		return $this->cache['category']['main'];
+	}
 
-		// build category tree, and select the main category
-		$tree = new CategoryTree($categories);
-		$treeEntry = $tree->getById($mainCategoryId);
+	public function getShopCategoryIds()
+	{
+		if( empty($this->cache['category']['categories']) )
+		{
+			$mainCategoryId = $this->getShopMainCategoryId();
 
-		// select all children of the mainCategory
-		$children = $treeEntry->getDeepChildren();
+			// get all categories
+			$sql = "SELECT id, parent FROM s_categories";
+			$categories = $this->db->executeQuery($sql)->fetchAll();
 
-		// get ids of the children
-		$categoryIds = array_map(function($child) { return $child->getId(); }, $children);
+			// build category tree, and select the main category
+			$tree = new CategoryTree($categories);
+			$treeEntry = $tree->getById($mainCategoryId);
 
-		// add main if needed
-		if( !in_array($mainCategoryId, $categoryIds) ) $categoryIds[] = $mainCategoryId;
+			// select all children of the mainCategory
+			$children = $treeEntry->getDeepChildren();
 
-		return $categoryIds;
+			// get ids of the children and index them
+			$categoryIds = [];
+			foreach( $children as $child )
+			{
+				$categoryIds[$child->getId()] = $child->getId();
+			}
+
+			// add main if necessary
+			if( !isset($categoryIds[ $mainCategoryId ]) )
+			{
+				$categoryIds[ $mainCategoryId ] = $mainCategoryId;
+			}
+
+			$this->cache['category']['categories'] = $categoryIds;
+		}
+
+		return $this->cache['category']['categories'];
 	}
 
 	/**
@@ -642,20 +669,32 @@ class SooqrXml
 	{
 		$categoryParents = array_map(function($parent) { return (int)trim($parent); }, explode(',', Shopware()->Config()->get(ShopwareConfig::getName('category_parents'), "1")));
 
+		// get all categories of the article
 		$articleCategories = $article->getCategories();
 
 		$levels = [];
 
+		$shopCategoryIds = $this->getShopCategoryIds();
+
 		// loop through all categories of the article
 		foreach( $articleCategories as $category )
 		{
+			// don't include categories of other shops
+			if( !isset($shopCategoryIds[ $category->getId() ]) ) continue;
+
 			$categories = [ $category->getName() ];
 
 			// get categories till at root, 
 			// or till a parent category from the config is reached
 			while($category = $category->getParent())
 			{
+				// stop when category is in the categoryParents config
 				if( in_array($category->getId(), $categoryParents) ) break;
+
+				// stop when category is the main category for the (sub)shop
+				if( $category->getId() === $this->getShopMainCategoryId() ) break;
+
+				// add to categories
 				array_unshift($categories, $category->getName());
 			}
 
