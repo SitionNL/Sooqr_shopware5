@@ -391,30 +391,68 @@ class SooqrXml
 	    return $status;
 	}
 
+	/**
+	 * Get the main shop for the current shop
+	 *
+	 * This is the current shop if its a subshop or the main shop,
+	 * but with language shops it is the shop its connected to
+	 *
+	 * @return Shopware\Models\Shop\Shop
+	 */
+	public function getMainShop()
+	{
+		$main = $this->shop->getMain();
+		if( empty($main) ) $main = $this->shop;
+
+		return $main;
+	}
+
+	/**
+	 * Get the protocol for the current shop
+	 * If the shop uses SSL for everything, render SSL links
+	 *
+	 * @return string
+	 */
+	public function getShopProtocol()
+	{
+		return $this->getMainShop()->getAlwaysSecure() ? 'https' : 'http';
+	}
+
+	/**
+	 * Get the hostname for the current shop
+	 *
+	 * @return string
+	 */
 	public function getShopHost()
 	{
 		$host = Shopware()->Config()->get("host");
 
 		if( !$host ) {
-			$mainShop = $this->shop->getMain() ?: $this->shop;
-			$host = $mainShop->getHost();
+			$host = $this->getMainShop()->getHost();
 		}
 
 		return $host;
 	}
 
+	/**
+	 * Get the protocol + hostname + the baseUrl of the (sub)shop
+	 *
+	 * @return string
+	 */
 	public function getShopBaseUrl()
 	{
 		$host = $this->getShopHost();
 		$baseUrl = $this->shop->getBaseUrl();
 
 		$path = Helpers::pathCombine($host, $baseUrl);
+		$protocol = $this->getShopProtocol();
 
-		return "http://{$path}";
+		return "{$protocol}://{$path}";
 	}
 
 	/**
 	 * Build the url to an article
+	 *
 	 * @return string          Url to article
 	 */
 	public function getUrlForArticle($article)
@@ -458,6 +496,12 @@ class SooqrXml
 		return $thumbnails[$size];
 	}
 
+	/**
+	 * Get the url to the thumbnail image
+	 *
+	 * @param  Shopware\Models\Article\Article $article
+	 * @return string
+	 */
 	public function getImageLinkArticle($article)
 	{
 		// engine/Shopware/Controllers/Frontend/Detail.php on line 99 (sGetArticleById)
@@ -476,14 +520,13 @@ class SooqrXml
 				$path = $this->selectThumbnail($thumbnails);
 				if( !$path ) return '';
 
-				$host = $this->getShopHost();
-
 				// $path = $media->getPath();
 
 				// dont follow urls, takes a looooong time
 				// return $this->getUrlRedirectedTo("http://{$host}/{$path}");
 
-				return "http://{$host}/{$path}";
+				// Media urls doesn't use the suburl of a subshop
+				return Helpers::pathCombine( $this->getShopProtocol() . '://' . $this->getShopHost(), $path );
 			}
 			
 		}
