@@ -12,6 +12,7 @@ use Shopware\SitionSooqr\Components\Helpers;
 use Shopware\SitionSooqr\Components\PluginJson;
 use Shopware\SitionSooqr\CategoryTree\CategoryTree;
 use Shopware\SitionSooqr\CategoryTree\CategoryTreeEntry;
+use Shopware\SitionSooqr\Components\UrlRewriter;
 
 class SooqrXml
 {
@@ -46,6 +47,11 @@ class SooqrXml
 	protected $pluginJson;
 
 	/**
+	 * @var Shopware\SitionSooqr\Components\UrlRewriter
+	 */
+	protected $urlRewriter;
+
+	/**
 	 * Array to cache some variables
 	 * @var array
 	 */
@@ -69,6 +75,7 @@ class SooqrXml
 		$this->config = Shopware()->Config();
 		$this->db = Shopware()->Db();
 		$this->pluginJson = new PluginJson;
+		$this->urlRewriter = new UrlRewriter;
 
 		// add namespaces, so they can be used in the generation of xml snippets
 		SimpleXMLElement::addNamespace('sqr', "http://base.sooqr.com/ns/1.0");
@@ -467,7 +474,14 @@ class SooqrXml
 		$query = $db->executeQuery($sql, $params);
 		$row = $query->fetch();
 
-		return isset($row['path']) ? Helpers::pathCombine( $this->getShopBaseUrl(), $row['path'] ) : "";
+		$path = $row['path'];
+
+		if( empty($path) )
+		{
+			$path = array_pop($this->urlRewriter->rewriteArticles($this->shop, [ $article->getId() ]));
+		}
+
+		return !empty($path) ? Helpers::pathCombine( $this->getShopBaseUrl(), $path ) : "";
 	}
 
 	public function selectThumbnail($thumbnails)
