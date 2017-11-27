@@ -467,7 +467,24 @@ class SooqrXml
 		$articleId = $article->getId();
 
 		$db = Shopware()->Db();
+        $router = Shopware()->Container()->get('router');
 
+        // get ugly path: (shopware.php?sViewport=detail&sArticle=20)
+        $basePath = $this->config->get('baseFile') . '?sViewport=detail&sArticle=' . $articleId;
+
+        // make path as pretty as possible (rewrite url or if rewrite url unavailable the default url)
+        //
+        // From:
+        // engine/Shopware/Plugins/Default/Core/PostFilter/Bootstrap.php
+        //
+        // Shopware/Components/Routing/Generators/RewriteGenerator
+        // Shopware/Components/Routing/Generators/DefaultGenerator
+        //
+        $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ]));
+        if( !empty($path) ) return $path;
+
+
+        // try to get rewrite path manually
 		$sql = "SELECT path FROM s_core_rewrite_urls WHERE org_path = :org_path AND main = 1";
 		$params = [ ":org_path" => "sViewport=detail&sArticle={$articleId}" ];
 
@@ -476,12 +493,7 @@ class SooqrXml
 
 		$path = $row['path'];
 
-		if( empty($path) )
-		{
-			$path = array_pop($this->urlRewriter->rewriteArticles($this->shop, [ $article->getId() ]));
-		}
-
-		return !empty($path) ? Helpers::pathCombine( $this->getShopBaseUrl(), $path ) : "";
+		return Helpers::pathCombine( $this->getShopBaseUrl(), (empty($path) ? $basePath : $path) );
 	}
 
 	public function selectThumbnail($thumbnails)
