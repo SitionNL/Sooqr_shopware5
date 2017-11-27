@@ -9,7 +9,7 @@
     "link": "https://www.sition.nl",
     "author": "Sition Internet Services",
 
-    "currentVersion": "1.3.7",
+    "currentVersion": "1.3.8",
 
     "changelog": {
         "de": {
@@ -22,7 +22,8 @@
             "1.3.0": "In einem Feed sind nur die Artikel der Subshop",
             "1.3.1": "Fügt eine Anmelde-Schaltfläche zur Konfigurations-Seite hinzu",
             "1.3.6": "Es werden nur Kategorien des aktuellen Shops hinzugefügt",
-            "1.3.7": "Erstellen Sie https-Links, wenn der SSL-Shop sie für alles verwendet."
+            "1.3.7": "Erstellen Sie https-Links, wenn der SSL-Shop sie für alles verwendet.",
+            "1.3.8": "Seo URL erzeugen, wenn es noch nicht existiert"
         },
         "en": {
             "1.0.0": "First release",
@@ -35,7 +36,8 @@
             "1.3.0": "Feeds only provide the articles of the subshop",
             "1.3.1": "Adds a signup button to config page",
             "1.3.6": "Only categories of the current shop are added",
-            "1.3.7": "Render https links when shop uses SSL for everything"
+            "1.3.7": "Render https links when shop uses SSL for everything",
+            "1.3.8": "Generate seo url if it doesn't exist yet"
         },
         "nl": {
             "1.0.0": "Eerste uitgave",
@@ -47,7 +49,8 @@
             "1.3.0": "In een feed zitten alleen de artikelen van de subshop",
             "1.3.1": "Voegt een aanmeldknop toe aan de configuratiepagina",
             "1.3.6": "Alleen categorieën van de huidige shop worden toegevoegd",
-            "1.3.7": "Maak https links aan als de shop SSL voor alles gebruikt"
+            "1.3.7": "Maak https links aan als de shop SSL voor alles gebruikt",
+            "1.3.8": "Genereer seo url als deze nog niet bestaat"
         }
     },
 
