@@ -12,7 +12,6 @@ use Shopware\SitionSooqr\Components\Helpers;
 use Shopware\SitionSooqr\Components\PluginJson;
 use Shopware\SitionSooqr\CategoryTree\CategoryTree;
 use Shopware\SitionSooqr\CategoryTree\CategoryTreeEntry;
-use Shopware\SitionSooqr\Components\UrlRewriter;
 
 class SooqrXml
 {
@@ -47,11 +46,6 @@ class SooqrXml
 	protected $pluginJson;
 
 	/**
-	 * @var Shopware\SitionSooqr\Components\UrlRewriter
-	 */
-	protected $urlRewriter;
-
-	/**
 	 * Array to cache some variables
 	 * @var array
 	 */
@@ -75,7 +69,6 @@ class SooqrXml
 		$this->config = Shopware()->Config();
 		$this->db = Shopware()->Db();
 		$this->pluginJson = new PluginJson;
-		$this->urlRewriter = new UrlRewriter;
 
 		// add namespaces, so they can be used in the generation of xml snippets
 		SimpleXMLElement::addNamespace('sqr', "http://base.sooqr.com/ns/1.0");
