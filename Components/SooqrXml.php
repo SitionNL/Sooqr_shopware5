@@ -59,7 +59,7 @@ class SooqrXml
 
 	public function __construct($shopId = null)
 	{
-		set_time_limit(60 * 60); // 1 hour
+		set_time_limit(7 * 24 * 60 * 60); // 7 days
 
 		$this->em = Shopware()->Models(); // modelManager
 
