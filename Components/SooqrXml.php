@@ -12,6 +12,7 @@ use Shopware\SitionSooqr\Components\Helpers;
 use Shopware\SitionSooqr\Components\PluginJson;
 use Shopware\SitionSooqr\CategoryTree\CategoryTree;
 use Shopware\SitionSooqr\CategoryTree\CategoryTreeEntry;
+use Shopware\Components\Routing\Context as RoutingContext;
 
 class SooqrXml
 {
@@ -473,7 +474,8 @@ class SooqrXml
         // Shopware/Components/Routing/Generators/RewriteGenerator
         // Shopware/Components/Routing/Generators/DefaultGenerator
         //
-        $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ]));
+        $context = new RoutingContext($this->getShopHost(), $this->shop->getBaseUrl(), !!$this->getMainShop()->getAlwaysSecure());
+        $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ], $context));
         if( !empty($path) ) return $path;
 
 
