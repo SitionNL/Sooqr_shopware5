@@ -475,7 +475,8 @@ class SooqrXml
         // Shopware/Components/Routing/Generators/DefaultGenerator
         //
         $context = new RoutingContext($this->getShopHost(), $this->shop->getBaseUrl(), !!$this->getMainShop()->getAlwaysSecure());
-        $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ], $context));
+        $paths = $router->generateList([ htmlspecialchars_decode($basePath) ], $context);
+        $path = array_pop($paths);
         if( !empty($path) ) return $path;
 
 
