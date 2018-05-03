@@ -533,6 +533,24 @@ class SooqrXml
 		{
 			$image = $article->getImages()->first();
 
+            // get keys from all images of array collection
+            $keys = $article->getImages()->getKeys();
+
+            // loop trough images based on keys
+            if (count($keys) > 0){
+                foreach ($keys as $key){
+
+                    // get image by index key
+                    $singleImage = $article->getImages()->get($key);
+
+                    // $image is the main image
+                    if ($singleImage->getMain() == 1){
+                        $image = $singleImage;
+                    }
+
+                }
+            }
+
 			if( $image )
 			{
 				$media = $image->getMedia();
