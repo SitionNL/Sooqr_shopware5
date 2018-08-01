@@ -475,8 +475,7 @@ class SooqrXml
         // Shopware/Components/Routing/Generators/DefaultGenerator
         //
         $context = new RoutingContext($this->getShopHost(), $this->shop->getBaseUrl(), !!$this->getMainShop()->getAlwaysSecure());
-        $paths = $router->generateList([ htmlspecialchars_decode($basePath) ], $context);
-        $path = array_pop($paths);
+        $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ], $context));
         if( !empty($path) ) return $path;
 
 
@@ -531,6 +530,7 @@ class SooqrXml
 
 		try
 		{
+		    //legacy, use first image in case there is no main image, or faulty
 			$image = $article->getImages()->first();
 
             // get keys from all images of array collection
