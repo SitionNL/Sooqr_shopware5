@@ -48,8 +48,8 @@ class Shopware_Plugins_Backend_SitionSooqr_Bootstrap extends Shopware_Components
 
     public function install()
     {
-        if (!$this->assertMinimumVersion('4.3.0')) {
-            throw new \RuntimeException('At least Shopware 4.3.0 is required');
+        if (!$this->assertMinimumVersion('5.4.0')) {
+            throw new \RuntimeException('At least Shopware 5.4.0 is required');
         }
 
         (new ShopwareConfig($this->config))->createConfig($this);
