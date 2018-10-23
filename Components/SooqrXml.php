@@ -416,7 +416,7 @@ class SooqrXml
 	 */
 	public function getShopProtocol()
 	{
-		return $this->getMainShop()->getAlwaysSecure() ? 'https' : 'http';
+		return $this->getMainShop()->getSecure() ? 'https' : 'http';
 	}
 
 	/**
@@ -474,7 +474,7 @@ class SooqrXml
         // Shopware/Components/Routing/Generators/RewriteGenerator
         // Shopware/Components/Routing/Generators/DefaultGenerator
         //
-        $context = new RoutingContext($this->getShopHost(), $this->shop->getBaseUrl(), !!$this->getMainShop()->getAlwaysSecure());
+        $context = new RoutingContext($this->getShopHost(), $this->shop->getBaseUrl(), !!$this->getMainShop()->getSecure());
         $path = array_pop($router->generateList([ htmlspecialchars_decode($basePath) ], $context));
         if( !empty($path) ) return $path;
 
