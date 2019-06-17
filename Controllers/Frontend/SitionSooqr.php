@@ -7,7 +7,7 @@ use Shopware\SitionSooqr\Components\ShopwareConfig;
 
 class Shopware_Controllers_Frontend_SitionSooqr extends Enlight_Controller_Action
 {
-	public function xmlAction($args) 
+	public function xmlAction()
 	{
 		$request = $this->Request();
 

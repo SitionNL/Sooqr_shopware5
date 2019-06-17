@@ -9,7 +9,7 @@
     "link": "https://www.sition.nl",
     "author": "Sition Internet Services",
 
-    "currentVersion": "1.4.0",
+    "currentVersion": "1.5.0",
 
     "changelog": {
         "de": {
@@ -24,7 +24,8 @@
             "1.3.6": "Es werden nur Kategorien des aktuellen Shops hinzugefügt",
             "1.3.7": "Erstellen Sie https-Links, wenn der SSL-Shop sie für alles verwendet.",
             "1.3.8": "Seo URL erzeugen, wenn es noch nicht existiert",
-            "1.4.0": "Kompatibel mit der Shopware Version 5.4"
+            "1.4.0": "Kompatibel mit der Shopware Version 5.4",
+            "1.5.0": "Kompatibel mit der Shopware Version 5.5"
         },
         "en": {
             "1.0.0": "First release",
@@ -39,7 +40,8 @@
             "1.3.6": "Only categories of the current shop are added",
             "1.3.7": "Render https links when shop uses SSL for everything",
             "1.3.8": "Generate seo url if it doesn't exist yet",
-            "1.4.0": "Compatible with Shopware version 5.4"
+            "1.4.0": "Compatible with Shopware version 5.4",
+            "1.5.0": "Compatible with Shopware version 5.5"
         },
         "nl": {
             "1.0.0": "Eerste uitgave",
@@ -53,12 +55,13 @@
             "1.3.6": "Alleen categorieën van de huidige shop worden toegevoegd",
             "1.3.7": "Maak https links aan als de shop SSL voor alles gebruikt",
             "1.3.8": "Genereer seo url als deze nog niet bestaat",
-            "1.4.0": "Compabiliteit met Shopware versie 5.4"
+            "1.4.0": "Compabiliteit met Shopware versie 5.4",
+            "1.5.0": "Compabiliteit met Shopware versie 5.5"
         }
     },
 
     "compatibility": {
-        "minimumVersion": "5.4.0",
+        "minimumVersion": "5.5.0",
         "maximumVersion": null,
         "blacklist": [
         ]
