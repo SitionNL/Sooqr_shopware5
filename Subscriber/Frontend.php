@@ -36,7 +36,7 @@ class Frontend implements SubscriberInterface
 
             // get a random shop
             $key = array_rand($shopIds);
-            $shopId = $shopsIds[$key];
+            $shopId = $shopIds[$key];
 
             // remove key from array
             unset($shopIds[$key]);

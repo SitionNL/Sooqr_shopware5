@@ -869,6 +869,7 @@ class SooqrXml
 		$item->addChildIfNotEmpty("description", strip_tags($article->getDescriptionLong()));
 		$item->addChildIfNotEmpty("meta_title", strip_tags($article->getMetaTitle()));
 		$item->addChildIfNotEmpty("keywords", $article->getKeywords());
+		$item->addChildEscape("type", "product");
 
 		$item->addChildIfNotEmpty("brand", $supplier ? $supplier->getName() : "");
 
